@@ -16,14 +16,14 @@ class KerebtaApp extends StatelessWidget {
           themeMode: currentMode,
           theme: ThemeData(
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFFFAFAFA),
-            primaryColor: const Color(0xFFD4AF37), // Kerebta Gold
+            scaffoldBackgroundColor: const Color(0xFFF9F7F2), // Warm Bone
+            primaryColor: const Color(0xFFB8860B), // Darker Gold
             useMaterial3: true,
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF080808),
-            primaryColor: const Color(0xFFD4AF37),
+            scaffoldBackgroundColor: const Color(0xFF080808), // Obsidian
+            primaryColor: const Color(0xFFD4AF37), // Kerebta Gold
             useMaterial3: true,
           ),
           home: const OnboardingCarousel(),

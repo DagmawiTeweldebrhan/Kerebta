@@ -3,7 +3,8 @@ import '../theme/app_colors.dart';
 
 class SpineBackground extends StatefulWidget {
   final Widget child;
-  const SpineBackground({Key? key, required this.child}) : super(key: key);
+  final Color? spineColorOverride;
+  const SpineBackground({Key? key, required this.child, this.spineColorOverride}) : super(key: key);
 
   @override
   _SpineBackgroundState createState() => _SpineBackgroundState();
@@ -36,22 +37,26 @@ class _SpineBackgroundState extends State<SpineBackground> with SingleTickerProv
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        widget.child,
-        // Razor-thin spine explicitly threaded in front of all elements
+        // Razor-thin spine explicitly placed BEHIND the UI
         Align(
           alignment: Alignment.center,
           child: IgnorePointer(
             child: AnimatedBuilder(
               animation: _opacityAnimation,
               builder: (context, child) {
+                final bool isLightMode = Theme.of(context).brightness == Brightness.light;
+                final Color defaultGold = isLightMode ? const Color(0xFFB8860B) : AppColors.kerebtaGold;
+                final Color activeColor = widget.spineColorOverride ?? defaultGold;
+                
                 return Container(
                   width: 0.8, // Razor-thin
-                  color: AppColors.kerebtaGold.withOpacity(_opacityAnimation.value),
+                  color: activeColor.withOpacity(widget.spineColorOverride != null ? 1.0 : _opacityAnimation.value),
                 );
               },
             ),
           ),
         ),
+        widget.child,
       ],
     );
   }
