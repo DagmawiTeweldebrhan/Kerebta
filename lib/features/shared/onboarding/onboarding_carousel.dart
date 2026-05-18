@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../app.dart';
+import '../../../services/auth_service.dart';
+import 'sign_up_screen.dart';
 
 class OnboardingCarousel extends StatefulWidget {
   const OnboardingCarousel({Key? key}) : super(key: key);
@@ -17,6 +19,9 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
   bool hasError = false;
   bool _isValid = false;
   bool _isPasswordVisible = false;
+  bool _socialLoading = false;
+
+  final AuthService _authService = AuthService();
   
   final TextEditingController _authController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -102,6 +107,36 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
         });
       }
     });
+  }
+
+  Future<void> _handleSocialAuth(String provider) async {
+    setState(() => _socialLoading = true);
+    try {
+      final result = provider == 'google'
+          ? await _authService.signInWithGoogle()
+          : await _authService.signInWithApple();
+
+      if (result.user != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome, ${result.user!.email ?? 'User'}!'),
+            backgroundColor: Theme.of(context).primaryColor,
+          ),
+        );
+        // TODO: Navigate to home feed
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign in failed: ${e.toString().split(']').last.trim()}'),
+            backgroundColor: const Color(0xFFDA121A),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _socialLoading = false);
+    }
   }
 
   @override
@@ -519,17 +554,20 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       mainAxisSize: MainAxisSize.min,
                                                       children: [
-                                                        AnimatedSwitcher(
-                                                          duration: const Duration(milliseconds: 300),
-                                                          child: Text(
-                                                            isAmharic ? "አድናቂ" : "Fan",
-                                                            key: ValueKey(isAmharic),
-                                                            style: GoogleFonts.poppins(
-                                                              color: goldColor,
-                                                              fontSize: 22.0, // Larger
-                                                              fontWeight: FontWeight.w700, // Bolder
-                                                              decoration: TextDecoration.underline,
-                                                              decorationColor: goldColor,
+                                                        GestureDetector(
+                                                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen(role: UserRole.fan))),
+                                                          child: AnimatedSwitcher(
+                                                            duration: const Duration(milliseconds: 300),
+                                                            child: Text(
+                                                              isAmharic ? "አድናቂ" : "Fan",
+                                                              key: ValueKey(isAmharic),
+                                                              style: GoogleFonts.poppins(
+                                                                color: goldColor,
+                                                                fontSize: 22.0,
+                                                                fontWeight: FontWeight.w700,
+                                                                decoration: TextDecoration.underline,
+                                                                decorationColor: goldColor,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
@@ -540,17 +578,20 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
                                                           color: goldColor,
                                                         ),
                                                         const SizedBox(width: 16.0),
-                                                        AnimatedSwitcher(
-                                                          duration: const Duration(milliseconds: 300),
-                                                          child: Text(
-                                                            isAmharic ? "ፈጣሪ" : "Creator",
-                                                            key: ValueKey(isAmharic),
-                                                            style: GoogleFonts.poppins(
-                                                              color: goldColor,
-                                                              fontSize: 22.0, // Larger
-                                                              fontWeight: FontWeight.w700, // Bolder
-                                                              decoration: TextDecoration.underline,
-                                                              decorationColor: goldColor,
+                                                        GestureDetector(
+                                                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen(role: UserRole.creator))),
+                                                          child: AnimatedSwitcher(
+                                                            duration: const Duration(milliseconds: 300),
+                                                            child: Text(
+                                                              isAmharic ? "ፈጣሪ" : "Creator",
+                                                              key: ValueKey(isAmharic),
+                                                              style: GoogleFonts.poppins(
+                                                                color: goldColor,
+                                                                fontSize: 22.0,
+                                                                fontWeight: FontWeight.w700,
+                                                                decoration: TextDecoration.underline,
+                                                                decorationColor: goldColor,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
@@ -560,6 +601,27 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
                                                 ),
                                               ),
                                             ),
+                                            // Social Auth Icons
+                                            const SizedBox(height: 16.0),
+                                            _socialLoading
+                                              ? SizedBox(
+                                                  width: 24.0, height: 24.0,
+                                                  child: CircularProgressIndicator(strokeWidth: 2.0, color: goldColor),
+                                                )
+                                              : Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () => _handleSocialAuth('apple'),
+                                                      child: Icon(Icons.apple, color: textColor.withOpacity(0.4), size: 26.0),
+                                                    ),
+                                                    const SizedBox(width: 24.0),
+                                                    GestureDetector(
+                                                      onTap: () => _handleSocialAuth('google'),
+                                                      child: Icon(Icons.g_mobiledata_rounded, color: textColor.withOpacity(0.4), size: 32.0),
+                                                    ),
+                                                  ],
+                                                ),
                                           ],
                                         ),
                                       ],
