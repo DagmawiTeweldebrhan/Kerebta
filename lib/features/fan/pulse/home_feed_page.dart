@@ -53,6 +53,42 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       'isVerified': true,
       'gradient': [Color(0xFF00B0FF), Color(0xFF80D8FF)],
     },
+    {
+      'nickname': 'Abel Birhanu',
+      'avatarUrl': 'assets/images/creator_abel_birhanu.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFFFF9800), Color(0xFFFFB74D)],
+    },
+    {
+      'nickname': 'Adonay',
+      'avatarUrl': 'assets/images/creator_adonay.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFFE91E63), Color(0xFFF06292)],
+    },
+    {
+      'nickname': 'Jon Daniel',
+      'avatarUrl': 'assets/images/creator_jon_daniel.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFF9C27B0), Color(0xFFBA68C8)],
+    },
+    {
+      'nickname': 'Ethio Tech',
+      'avatarUrl': 'assets/images/creator_ethio_tech.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFF2196F3), Color(0xFF64B5F6)],
+    },
+    {
+      'nickname': 'Miko Mikee',
+      'avatarUrl': 'assets/images/creator_miko_mikee.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFF4CAF50), Color(0xFF81C784)],
+    },
+    {
+      'nickname': 'Seifu on EBS',
+      'avatarUrl': 'assets/images/creator_seifu_ebs.jpg',
+      'isVerified': true,
+      'gradient': [Color(0xFFF44336), Color(0xFFE57373)],
+    },
   ];
 
   // Mock data for Exclusive First
@@ -114,6 +150,28 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
     },
   ];
 
+  // Mock data for Hot Charities / GoFundMe
+  final List<Map<String, dynamic>> _charities = [
+    {
+      'title': 'Build a school in rural Ethiopia',
+      'titleAmh': 'በገጠር ኢትዮጵያ ትምህርት ቤት እንገንባ',
+      'creatorName': 'Abel Birhanu',
+      'progress': 0.75,
+      'donors': '3,240 donors',
+      'timeLeft': '5d left',
+      'imageUrl': 'assets/images/charity_school.jpg',
+    },
+    {
+      'title': 'Medical support for artist health fund',
+      'titleAmh': 'የህክምና ድጋፍ ለአርቲስቶች',
+      'creatorName': 'Seifu on EBS',
+      'progress': 0.42,
+      'donors': '1,120 donors',
+      'timeLeft': '18d left',
+      'imageUrl': 'assets/images/charity_medical.jpg',
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     // Exact requested theme specifications
@@ -140,7 +198,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       
       // PERSISTENT STICKY HEADER FRAME
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(68.0),
+        preferredSize: const Size.fromHeight(84.0),
         child: ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -155,9 +213,11 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
                 ),
               ),
               child: SafeArea(
+                bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  padding: const EdgeInsets.only(top: 24.0, bottom: 8.0, left: 12.0, right: 12.0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Far Left: Search Icon Button
                       IconButton(
@@ -173,73 +233,29 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
                         },
                       ),
 
-                      // Wallet Balance Button right next to the search icon
-                      GestureDetector(
-                        onTap: () {
-                          // Tap configurations routing to the app's wallet page
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(_isAmharic ? 'ወደ የኪስ ቦርሳ ገጽ በመሄድ ላይ...' : 'Routing to Wallet page...'),
-                              backgroundColor: primaryGold,
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                          decoration: BoxDecoration(
-                            color: primaryGold.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(20.0),
-                            border: Border.all(color: primaryGold.withOpacity(0.35), width: 1.0),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.monetization_on,
-                                color: primaryGold,
-                                size: 18.0,
-                              ),
-                              const SizedBox(width: 5.0),
-                              Text(
-                                "1,250 ETB",
-                                style: GoogleFonts.poppins(
-                                  color: primaryGold,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
                       // Perfectly Centered Kerebta Gold Logotype Asset
-                      Expanded(
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                'assets/images/logo.png',
-                                height: 32.0,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Beautiful fallback in case the image is not ready/loaded
-                                  return const Icon(Icons.stars_rounded, color: primaryGold, size: 28.0);
-                                },
-                              ),
-                              const SizedBox(width: 4.0),
-                              Text(
-                                _isAmharic ? "ቀረብታ" : "KEREBTA",
-                                style: GoogleFonts.poppins(
-                                  color: primaryGold,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 20.0,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                            ],
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/images/logo.png',
+                            height: 32.0,
+                            errorBuilder: (context, error, stackTrace) {
+                              // Beautiful fallback in case the image is not ready/loaded
+                              return const Icon(Icons.stars_rounded, color: primaryGold, size: 28.0);
+                            },
                           ),
-                        ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            _isAmharic ? "ቀረብታ" : "KEREBTA",
+                            style: GoogleFonts.poppins(
+                              color: primaryGold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20.0,
+                              letterSpacing: 2.0,
+                            ),
+                          ),
+                        ],
                       ),
 
                       // Far Right: Pinned Notifications with a red badge containing the number "1"
@@ -301,25 +317,119 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
           children: [
             const SizedBox(height: 12.0),
 
-            // CONFIGURATION ROW (Theme swapper & language drop-pill)
+            // SUB-HEADER FINANCIAL & UTILITY ROW
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Interactive Theme Swapper button (flipping sun/moon icon imagery)
-                  ValueListenableBuilder<ThemeMode>(
-                    valueListenable: appThemeMode,
-                    builder: (context, currentTheme, _) {
-                      final isCurrentDark = currentTheme == ThemeMode.dark;
-                      return GestureDetector(
+                  // Far Left: Wallet Balance Button
+                  GestureDetector(
+                    onTap: () {
+                      // Tap configurations routing to the app's wallet page
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(_isAmharic ? 'ወደ የኪስ ቦርሳ ገጽ በመሄድ ላይ...' : 'Routing to Wallet page...'),
+                          backgroundColor: primaryGold,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                      decoration: BoxDecoration(
+                        color: primaryGold.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20.0),
+                        border: Border.all(color: primaryGold.withOpacity(0.35), width: 1.0),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.monetization_on,
+                            color: primaryGold,
+                            size: 18.0,
+                          ),
+                          const SizedBox(width: 5.0),
+                          Text(
+                            "1,250 ETB",
+                            style: GoogleFonts.poppins(
+                              color: primaryGold,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Far Right: Configuration toggles side-by-side in a tight row
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Interactive Theme Swapper button (flipping sun/moon icon imagery)
+                      ValueListenableBuilder<ThemeMode>(
+                        valueListenable: appThemeMode,
+                        builder: (context, currentTheme, _) {
+                          final isCurrentDark = currentTheme == ThemeMode.dark;
+                          return GestureDetector(
+                            onTap: () {
+                              // Change the global theme notifier value dynamically!
+                              appThemeMode.value = isCurrentDark ? ThemeMode.light : ThemeMode.dark;
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                              decoration: BoxDecoration(
+                                color: cardBgColor,
+                                borderRadius: BorderRadius.circular(20.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: shadowColor,
+                                    blurRadius: 8.0,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ],
+                                border: Border.all(
+                                  color: isCurrentDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isCurrentDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                                    color: primaryGold,
+                                    size: 16.0,
+                                  ),
+                                  const SizedBox(width: 4.0),
+                                  Text(
+                                    isCurrentDark ? "Light" : "Dark",
+                                    style: GoogleFonts.poppins(
+                                      color: primaryTextColor,
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8.0),
+
+                      // Language drop-pills wrapper on the right displaying Icons.language alongside text "English" or "አማርኛ"
+                      GestureDetector(
                         onTap: () {
-                          // Change the global theme notifier value dynamically!
-                          appThemeMode.value = isCurrentDark ? ThemeMode.light : ThemeMode.dark;
+                          setState(() {
+                            _isAmharic = !_isAmharic;
+                          });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                           decoration: BoxDecoration(
                             color: cardBgColor,
                             borderRadius: BorderRadius.circular(20.0),
@@ -331,85 +441,32 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
                               )
                             ],
                             border: Border.all(
-                              color: isCurrentDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                              color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
                               width: 1.0,
                             ),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isCurrentDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                                color: primaryGold,
+                                Icons.language,
+                                color: trustBlue,
                                 size: 16.0,
                               ),
-                              const SizedBox(width: 6.0),
+                              const SizedBox(width: 4.0),
                               Text(
-                                isCurrentDark 
-                                    ? (_isAmharic ? "ብርሃን ሁነታ" : "Light Mode") 
-                                    : (_isAmharic ? "ጨለማ ሁነታ" : "Dark Mode"),
+                                _isAmharic ? "አማ" : "Eng",
                                 style: GoogleFonts.poppins(
                                   color: primaryTextColor,
-                                  fontSize: 12.0,
+                                  fontSize: 11.0,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
-
-                  // Language drop-pills wrapper on the right displaying Icons.language alongside text "English" or "አማርኛ"
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isAmharic = !_isAmharic;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-                      decoration: BoxDecoration(
-                        color: cardBgColor,
-                        borderRadius: BorderRadius.circular(20.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: shadowColor,
-                            blurRadius: 8.0,
-                            offset: const Offset(0, 2),
-                          )
-                        ],
-                        border: Border.all(
-                          color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
-                          width: 1.0,
-                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.language,
-                            color: trustBlue,
-                            size: 16.0,
-                          ),
-                          const SizedBox(width: 6.0),
-                          Text(
-                            _isAmharic ? "አማርኛ" : "English",
-                            style: GoogleFonts.poppins(
-                              color: primaryTextColor,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 4.0),
-                          Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: secondaryTextColor,
-                            size: 14.0,
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -974,6 +1031,200 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
                                       const SizedBox(width: 4.0),
                                       Text(
                                         challenge['timeLeft'],
+                                        style: GoogleFonts.poppins(
+                                          color: secondaryTextColor,
+                                          fontSize: 11.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 32.0),
+
+            // HOT CHARITIES / GO FUND ME SECTION HEADER
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.volunteer_activism,
+                        color: Colors.redAccent,
+                        size: 24.0,
+                      ),
+                      const SizedBox(width: 6.0),
+                      Text(
+                        _isAmharic ? "ትኩስ የበጎ አድራጎት" : "Hot Charities",
+                        style: GoogleFonts.poppins(
+                          color: primaryTextColor,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(_isAmharic ? 'ሁሉንም በጎ አድራጎት በቅርቡ ይጫናሉ' : 'Viewing all charities...'),
+                          backgroundColor: primaryGold,
+                        ),
+                      );
+                    },
+                    child: Text(
+                      _isAmharic ? "ሁሉንም እይ >" : "See All >",
+                      style: GoogleFonts.poppins(
+                        color: primaryGold,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8.0),
+
+            // Sequence of elevated list item cards for charities
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              itemCount: _charities.length,
+              itemBuilder: (context, index) {
+                final charity = _charities[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 14.0),
+                  decoration: BoxDecoration(
+                    color: cardBgColor,
+                    borderRadius: BorderRadius.circular(16.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowColor,
+                        blurRadius: 8.0,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+                    border: Border.all(
+                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left: Square charity image backdrop widget (64x64 dp, borderRadius: 12)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.asset(
+                            charity['imageUrl'],
+                            width: 64.0,
+                            height: 64.0,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 64.0,
+                                height: 64.0,
+                                color: Colors.redAccent.withOpacity(0.2),
+                                child: const Icon(Icons.favorite, color: Colors.redAccent, size: 28.0),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 14.0),
+
+                        // Right expanded column element
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Primary title text row
+                              Text(
+                                _isAmharic ? charity['titleAmh'] : charity['title'],
+                                style: GoogleFonts.poppins(
+                                  color: primaryTextColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2.0),
+
+                              // Subtitle reading "by [Creator Name]"
+                              Text(
+                                "by ${charity['creatorName']}",
+                                style: GoogleFonts.poppins(
+                                  color: secondaryTextColor,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+
+                              // Custom LinearProgressIndicator (height 6dp)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(3.0),
+                                child: LinearProgressIndicator(
+                                  value: charity['progress'] as double,
+                                  minHeight: 6.0,
+                                  backgroundColor: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.06),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.green, // Filled using Green for money/charity
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+
+                              // Baseline row showing progress, donors, and timer layout
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "${((charity['progress'] as double) * 100).toInt()}%",
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 11.0,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.people, color: Colors.green, size: 13.0),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        charity['donors'],
+                                        style: GoogleFonts.poppins(
+                                          color: secondaryTextColor,
+                                          fontSize: 11.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.schedule, color: Colors.grey, size: 13.0),
+                                      const SizedBox(width: 4.0),
+                                      Text(
+                                        charity['timeLeft'],
                                         style: GoogleFonts.poppins(
                                           color: secondaryTextColor,
                                           fontSize: 11.0,
