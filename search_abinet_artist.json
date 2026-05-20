@@ -1,0 +1,12 @@
+
+
+
+{
+ "resultCount":3,
+ "results": [
+{"wrapperType":"artist", "artistType":"Artist", "artistName":"Abinet Agonafir", "artistLinkUrl":"https://music.apple.com/us/artist/abinet-agonafir/265162231?uo=4", "artistId":265162231, "amgArtistId":1074759, "primaryGenreName":"Worldwide", "primaryGenreId":19}, 
+{"wrapperType":"artist", "artistType":"Artist", "artistName":"Abinet Agonafir", "artistLinkUrl":"https://music.apple.com/us/artist/abinet-agonafir/1528692440?uo=4", "artistId":1528692440, "primaryGenreName":"Worldwide", "primaryGenreId":19}, 
+{"wrapperType":"artist", "artistType":"Artist", "artistName":"Abinet Agonafir", "artistLinkUrl":"https://music.apple.com/us/artist/abinet-agonafir/1823707486?uo=4", "artistId":1823707486, "primaryGenreName":"Pop", "primaryGenreId":14}]
+}
+
+

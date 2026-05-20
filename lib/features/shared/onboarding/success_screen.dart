@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../fan/pulse/home_feed_page.dart';
 
 class SuccessScreen extends StatefulWidget {
   final String username;
@@ -55,8 +56,9 @@ class _SuccessScreenState extends State<SuccessScreen> with TickerProviderStateM
     // Auto-navigate to home after 4 seconds
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
-        // Navigate to home feed (placeholder - pop to root for now)
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeFeedPage()),
+        );
       }
     });
   }

@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../app.dart';
 import '../../../services/auth_service.dart';
 import 'sign_up_screen.dart';
+import '../../fan/pulse/home_feed_page.dart';
 
 class OnboardingCarousel extends StatefulWidget {
   const OnboardingCarousel({Key? key}) : super(key: key);
@@ -123,7 +124,10 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
             backgroundColor: Theme.of(context).primaryColor,
           ),
         );
-        // TODO: Navigate to home feed
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeFeedPage()),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -446,7 +450,10 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
                                                         if (!_isValid) {
                                                           _triggerError(); // Anti-Gravity Warning
                                                         } else {
-                                                          // Valid login action
+                                                          Navigator.pushReplacement(
+                                                            context,
+                                                            MaterialPageRoute(builder: (_) => const HomeFeedPage()),
+                                                          );
                                                         }
                                                       },
                                                       style: ElevatedButton.styleFrom(
