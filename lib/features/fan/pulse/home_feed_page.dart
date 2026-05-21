@@ -5,6 +5,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../app.dart';
 import '../../../core/common_widgets/spine_background.dart';
 import 'discover_tab.dart';
+import 'market_tab.dart';
+import 'wallet_tab.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({Key? key}) : super(key: key);
@@ -1255,8 +1257,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
         ),
       ),
       DiscoverTab(isAmharic: _isAmharic),
-      _buildPlaceholderTab("Market", "ገበያ"),
-      _buildPlaceholderTab("Wallet", "ኪስ ቦርሳ"),
+      MarketTab(isAmharic: _isAmharic),
+      WalletTab(isAmharic: _isAmharic),
       _buildPlaceholderTab("Profile", "መገለጫ"),
     ],
   ),
