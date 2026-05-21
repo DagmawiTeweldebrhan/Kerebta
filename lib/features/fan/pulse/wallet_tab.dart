@@ -47,12 +47,17 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
   }
 
   // ── Color Design System Constants ──
-  static const Color _scaffoldBg = Color(0xFF0B0B0D);
+  // Dark mode colors
+  static const Color _scaffoldBgDark = Color(0xFF0B0B0D);
   static const Color _goldAccent = Color(0xFFD4AF37);
   static const Color _emeraldGreen = Color(0xFF00E676);
   static const Color _neonBlue = Color(0xFF1D9BF0);
-  static const Color _surfaceCard = Color(0xFF141418);
+  static const Color _surfaceCardDark = Color(0xFF141418);
   static const Color _velvetSlate = Color(0xFF1F1F25);
+  // Light mode colors
+  static const Color _scaffoldBgLight = Color(0xFFF6F6F9);
+  static const Color _surfaceCardLight = Colors.white;
+
 
   // ── Mock Ledger Data ──
   final List<Map<String, dynamic>> _ledger = [
@@ -627,8 +632,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
         subtitle: Text(
           subtitle,
           style: GoogleFonts.poppins(
-            color: Colors.white54,
-            fontSize: 11,
+            color: _isLight ? Colors.black54 : Colors.white54,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
           ),
         ),
         trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white30),
@@ -665,8 +671,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                 message,
                 style: GoogleFonts.poppins(
                   color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
                 ),
               ),
             ),
@@ -711,8 +717,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    final bool _isLight = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
-      backgroundColor: _scaffoldBg,
+      backgroundColor: _isLight ? _scaffoldBgLight : _scaffoldBgDark,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -732,9 +739,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       Text(
                         widget.isAmharic ? 'ኪስ ቦርሳ' : 'Wallet',
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
+                          color: _isLight ? Colors.black : Colors.white,
                           fontWeight: FontWeight.w900,
-                          fontSize: 28,
+                          fontSize: 34,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -784,7 +791,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       padding: const EdgeInsets.all(1.5), // Multi-layered border thickness
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _surfaceCard,
+                          color: _isLight ? _surfaceCardLight : _surfaceCardDark,
                           borderRadius: BorderRadius.circular(22.5),
                         ),
                         child: ClipRRect(
@@ -1226,9 +1233,10 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
   Widget _buildActionButton({
     required BuildContext context,
     required IconData icon,
-    required String label,
+    required String title,
     required VoidCallback onTap,
   }) {
+    final bool _isLight = Theme.of(context).brightness == Brightness.light;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -1255,11 +1263,11 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
           ),
           const SizedBox(height: 8),
           Text(
-            label,
+            title,
             style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
+              color: _isLight ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
             ),
           ),
         ],

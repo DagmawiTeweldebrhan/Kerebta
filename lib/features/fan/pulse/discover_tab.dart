@@ -71,8 +71,8 @@ class _DiscoverTabState extends State<DiscoverTab>
 
   TextStyle _sectionHeader(BuildContext context, bool isDark) => GoogleFonts.poppins(
         color: isDark ? Colors.white : const Color(0xFF1A1A1A),
-        fontSize: 22,
-        fontWeight: FontWeight.w800,
+        fontSize: 24,
+        fontWeight: FontWeight.w900,
         letterSpacing: -0.4,
       );
 
@@ -215,7 +215,7 @@ class _DiscoverTabState extends State<DiscoverTab>
                                   style: GoogleFonts.poppins(
                                     color: primaryGold,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 20,
+                                    fontSize: 22,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -224,8 +224,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                                     item['title']!,
                                     style: GoogleFonts.poppins(
                                       color: primaryText,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -312,8 +312,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                               'ALBUM PRE‑SALE',
                               style: GoogleFonts.poppins(
                                 color: primaryGold,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 11,
                                 letterSpacing: 1.5,
                               ),
                             ),
@@ -323,8 +323,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                             'Aster Aweke - Kerebta Acoustic',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 22,
+                              fontWeight: FontWeight.w950,
+                              fontSize: 25,
                               letterSpacing: -0.5,
                             ),
                             maxLines: 2,
@@ -339,7 +339,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                                   'Pre‑order limited edition vinyl and unlock 3 exclusive live tracks.',
                                   style: GoogleFonts.poppins(
                                     color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
@@ -385,8 +386,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                     widget.isAmharic ? 'አጫጭር ቪዲዮዎች' : 'Trending Short Clips',
                     style: GoogleFonts.poppins(
                       color: primaryText,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -483,8 +484,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                                     item['title'] as String,
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -509,8 +510,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                     widget.isAmharic ? 'ልዩ የድምፅ ጠብታዎች' : 'Exclusive Audio Drops',
                     style: GoogleFonts.poppins(
                       color: primaryText,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -572,8 +573,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                                       item['title']!,
                                       style: GoogleFonts.poppins(
                                         color: primaryText,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
+                                        fontWeight: FontWeight.w850,
+                                        fontSize: 15,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -583,8 +584,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                                       item['subtitle']!,
                                       style: GoogleFonts.poppins(
                                         color: secondaryText,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -675,8 +676,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                         widget.isAmharic ? "አጣራ" : "Filters",
                         style: GoogleFonts.poppins(
                           color: primaryText,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -704,8 +705,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                     widget.isAmharic ? "የይዘት ዓይነት" : "Content Type",
                     style: GoogleFonts.poppins(
                       color: primaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -734,8 +735,8 @@ class _DiscoverTabState extends State<DiscoverTab>
                     widget.isAmharic ? "ዘውግ" : "Genre",
                     style: GoogleFonts.poppins(
                       color: primaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 12),

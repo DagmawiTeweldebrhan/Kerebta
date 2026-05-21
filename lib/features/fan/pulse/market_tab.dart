@@ -275,8 +275,8 @@ class _MarketTabState extends State<MarketTab>
                                       });
                                     },
                                     style: GoogleFonts.poppins(
-                                      color: primaryText,
-                                      fontSize: 14,
+                                      color: Colors.white38,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
                                     decoration: InputDecoration(
@@ -318,7 +318,7 @@ class _MarketTabState extends State<MarketTab>
                                 style: GoogleFonts.poppins(
                                   color: _goldAccent,
                                   fontWeight: FontWeight.w900,
-                                  fontSize: 28,
+                                  fontSize: 30,
                                   letterSpacing: 2.0,
                                 ),
                               ),
@@ -351,8 +351,8 @@ class _MarketTabState extends State<MarketTab>
                                           '1,250 ETB',
                                           style: GoogleFonts.poppins(
                                             color: primaryText,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 13,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 14,
                                           ),
                                         ),
                                       ],
@@ -526,10 +526,10 @@ class _MarketTabState extends State<MarketTab>
                                     ),
                                     child: Text(
                                       _formatCountdown(),
-                                      style: GoogleFonts.robotoMono(
+                                      style: GoogleFonts.poppins(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -935,8 +935,8 @@ class _MarketTabState extends State<MarketTab>
                           : (item['name'] as String),
                       style: GoogleFonts.poppins(
                         color: primaryText,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
                         height: 1.3,
                       ),
                       maxLines: 2,
@@ -953,8 +953,8 @@ class _MarketTabState extends State<MarketTab>
                           item['price'] as String,
                           style: GoogleFonts.poppins(
                             color: _neonBlue,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
