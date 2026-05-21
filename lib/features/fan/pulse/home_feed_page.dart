@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../app.dart';
 import '../../../core/common_widgets/spine_background.dart';
+import 'discover_tab.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({Key? key}) : super(key: key);
@@ -12,10 +13,11 @@ class HomeFeedPage extends StatefulWidget {
   State<HomeFeedPage> createState() => _HomeFeedPageState();
 }
 
-class _HomeFeedPageState extends State<HomeFeedPage> {
+class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderStateMixin {
   int _currentTabIndex = 0;
   bool _isAmharic = false;
-
+  late final AnimationController _fadeController;
+  late final Animation<double> _fadeAnimation;
   // Mock data for Top Trending Creators
   final List<Map<String, dynamic>> _creators = [
     {
@@ -311,10 +313,13 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       ),
 
       // MAIN CONTENT SCROLL FEED
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: IndexedStack(
+        index: _currentTabIndex,
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12.0),
 
@@ -514,7 +519,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: LinearGradient(
-                                  colors: creator['gradient'] as List<Color>,
+                                  colors: (creator['gradient'] as List<Color>?) ?? [Colors.grey, Colors.grey],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
@@ -1249,6 +1254,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
           ],
         ),
       ),
+      DiscoverTab(isAmharic: _isAmharic),
+      _buildPlaceholderTab("Market", "ገበያ"),
+      _buildPlaceholderTab("Wallet", "ኪስ ቦርሳ"),
+      _buildPlaceholderTab("Profile", "መገለጫ"),
+    ],
+  ),
 
       // BASE NAVIGATION MATRIX PANEL (Rigid BottomNavigationBar container sitting flush at base)
       bottomNavigationBar: Container(
@@ -1352,5 +1363,50 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       case 4: return "መገለጫ";
       default: return "";
     }
+  }
+
+  Widget _buildPlaceholderTab(String title, String titleAmh) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color scaffoldBgColor = isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA);
+    const Color primaryGold = Color(0xFFD4AF37);
+    final Color primaryTextColor = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final Color secondaryTextColor = isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF555555);
+
+    return Scaffold(
+      backgroundColor: scaffoldBgColor,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              title == "Market" 
+                  ? Icons.storefront 
+                  : title == "Wallet" 
+                      ? Icons.account_balance_wallet 
+                      : Icons.person,
+              size: 64.0,
+              color: primaryGold,
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              _isAmharic ? titleAmh : title,
+              style: GoogleFonts.poppins(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: primaryTextColor,
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              _isAmharic ? "ይህ ገጽ በቅርቡ ይለቀቃል!" : "This page is coming soon!",
+              style: GoogleFonts.poppins(
+                fontSize: 14.0,
+                color: secondaryTextColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
