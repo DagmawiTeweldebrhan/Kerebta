@@ -323,7 +323,7 @@ class _DiscoverTabState extends State<DiscoverTab>
                             'Aster Aweke - Kerebta Acoustic',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
-                              fontWeight: FontWeight.w950,
+                              fontWeight: FontWeight.w900,
                               fontSize: 25,
                               letterSpacing: -0.5,
                             ),
@@ -573,7 +573,7 @@ class _DiscoverTabState extends State<DiscoverTab>
                                       item['title']!,
                                       style: GoogleFonts.poppins(
                                         color: primaryText,
-                                        fontWeight: FontWeight.w850,
+                                        fontWeight: FontWeight.w800,
                                         fontSize: 15,
                                       ),
                                       maxLines: 1,

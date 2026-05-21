@@ -255,8 +255,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                             _isAmharic ? "ቀረብታ" : "KEREBTA",
                             style: GoogleFonts.poppins(
                               color: primaryGold,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20.0,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 22.0,
                               letterSpacing: 2.0,
                             ),
                           ),
@@ -362,8 +362,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                             "1,250 ETB",
                             style: GoogleFonts.poppins(
                               color: primaryGold,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13.0,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.0,
                             ),
                           ),
                         ],
@@ -489,8 +489,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                 _isAmharic ? "ከፍተኛ ተወዳጅ ፈጣሪዎች" : "Top Trending Creators",
                 style: GoogleFonts.poppins(
                   color: primaryTextColor,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -598,8 +598,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               color: primaryTextColor,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 13.0,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -619,8 +619,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                 _isAmharic ? "ብቸኛ ቀዳሚዎች" : "Exclusive First",
                 style: GoogleFonts.poppins(
                   color: primaryTextColor,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -811,8 +811,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                                 release['title'],
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.w800,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -842,8 +842,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                                     release['creatorName'],
                                     style: GoogleFonts.poppins(
                                       color: Colors.white.withOpacity(0.85),
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                   const SizedBox(width: 4.0),
@@ -884,8 +884,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                         _isAmharic ? "በመታየት ላይ ያሉ ፈተናዎች" : "Trending Challenges",
                         style: GoogleFonts.poppins(
                           color: primaryTextColor,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w900,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -904,8 +904,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                       _isAmharic ? "ሁሉንም እይ >" : "See All >",
                       style: GoogleFonts.poppins(
                         color: primaryGold,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
                       ),
                     ),
                   ),
@@ -974,8 +974,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                                 _isAmharic ? challenge['titleAmh'] : challenge['title'],
                                 style: GoogleFonts.poppins(
                                   color: primaryTextColor,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.w800,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1078,8 +1078,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                         _isAmharic ? "ትኩስ የበጎ አድራጎት" : "Hot Charities",
                         style: GoogleFonts.poppins(
                           color: primaryTextColor,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w900,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -1098,8 +1098,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                       _isAmharic ? "ሁሉንም እይ >" : "See All >",
                       style: GoogleFonts.poppins(
                         color: primaryGold,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.0,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
                       ),
                     ),
                   ),
@@ -1168,8 +1168,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
                                 _isAmharic ? charity['titleAmh'] : charity['title'],
                                 style: GoogleFonts.poppins(
                                   color: primaryTextColor,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.w800,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1286,12 +1286,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
           selectedItemColor: primaryGold, // Home active color is #D4AF37
           unselectedItemColor: isDark ? Colors.white54 : Colors.black38,
           selectedLabelStyle: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            fontSize: 12.0,
+            fontWeight: FontWeight.w900,
+            fontSize: 13.0,
           ),
           unselectedLabelStyle: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            fontSize: 12.0,
+            fontWeight: FontWeight.w800,
+            fontSize: 13.0,
           ),
           showUnselectedLabels: true, // Keep labels persistent and completely readable
           onTap: (index) {
@@ -1393,8 +1393,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
             Text(
               _isAmharic ? titleAmh : title,
               style: GoogleFonts.poppins(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
+                fontSize: 26.0,
+                fontWeight: FontWeight.w900,
                 color: primaryTextColor,
               ),
             ),
@@ -1402,7 +1402,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with SingleTickerProviderSt
             Text(
               _isAmharic ? "ይህ ገጽ በቅርቡ ይለቀቃል!" : "This page is coming soon!",
               style: GoogleFonts.poppins(
-                fontSize: 14.0,
+                fontSize: 15.0,
+                fontWeight: FontWeight.w600,
                 color: secondaryTextColor,
               ),
             ),

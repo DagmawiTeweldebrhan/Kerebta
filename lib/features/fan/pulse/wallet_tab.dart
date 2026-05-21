@@ -26,6 +26,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
   // State variable for scanning simulation
   bool _isScanningCode = false;
 
+  bool get _isLight => Theme.of(context).brightness == Brightness.light;
+  Color get _surfaceCard => _isLight ? _surfaceCardLight : _surfaceCardDark;
+
   @override
   void initState() {
     super.initState();
@@ -858,7 +861,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                         Text(
                                           'KEREBTA VAULT',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.white54,
+                                            color: _isLight ? Colors.black54 : Colors.white54,
                                             fontWeight: FontWeight.w900,
                                             fontSize: 10,
                                             letterSpacing: 2.0,
@@ -873,7 +876,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                         Text(
                                           widget.isAmharic ? 'የኪስ ሂሳብ ቀሪ' : 'Available Balance',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.white38,
+                                            color: _isLight ? Colors.black38 : Colors.white38,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 11,
                                             letterSpacing: 0.5,
@@ -886,7 +889,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                               child: Text(
                                                 _formatBalance(1250.00),
                                                 style: GoogleFonts.robotoMono(
-                                                  color: Colors.white,
+                                                  color: _isLight ? Colors.black : Colors.white,
                                                   fontWeight: FontWeight.w900,
                                                   fontSize: 26,
                                                   letterSpacing: -0.5,
@@ -927,7 +930,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                           child: Text(
                                             '@abeni_music',
                                             style: GoogleFonts.poppins(
-                                              color: Colors.white70,
+                                              color: _isLight ? Colors.black87 : Colors.white70,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 13,
                                             ),
@@ -985,25 +988,25 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       _buildActionButton(
                         context: context,
                         icon: Icons.add_rounded,
-                        label: widget.isAmharic ? 'ሙላ' : 'Top-Up',
+                        title: widget.isAmharic ? 'ሙላ' : 'Top-Up',
                         onTap: () => _showTopUpSheet(context),
                       ),
                       _buildActionButton(
                         context: context,
                         icon: Icons.send_rounded,
-                        label: widget.isAmharic ? 'ላክ' : 'Send',
+                        title: widget.isAmharic ? 'ላክ' : 'Send',
                         onTap: () => _showSendSheet(context),
                       ),
                       _buildActionButton(
                         context: context,
                         icon: Icons.account_balance_rounded,
-                        label: widget.isAmharic ? 'ወጪ አድርግ' : 'Cash Out',
+                        title: widget.isAmharic ? 'ወጪ አድርግ' : 'Cash Out',
                         onTap: () => _showCashOutSheet(context),
                       ),
                       _buildActionButton(
                         context: context,
                         icon: Icons.qr_code_scanner_rounded,
-                        label: widget.isAmharic ? 'ቫውቸር' : 'Voucher',
+                        title: widget.isAmharic ? 'ቫውቸር' : 'Voucher',
                         onTap: () => _showVoucherSheet(context),
                       ),
                     ],
@@ -1023,7 +1026,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       child: Text(
                         widget.isAmharic ? 'የተገናኙ ሂሳቦች' : 'Linked Accounts',
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
+                          color: _isLight ? Colors.black87 : Colors.white,
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
                           letterSpacing: 0.3,
@@ -1097,7 +1100,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       Text(
                         widget.isAmharic ? 'የቅርብ ጊዜ እንቅስቃሴዎች' : 'Recent Activity',
                         style: GoogleFonts.poppins(
-                          color: Colors.white,
+                          color: _isLight ? Colors.black87 : Colors.white,
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
                           letterSpacing: 0.3,
@@ -1139,25 +1142,29 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       final String time = widget.isAmharic ? item['timeAmh'] as String : item['time'] as String;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                         decoration: BoxDecoration(
-                          color: _surfaceCard,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: _isLight 
+                                  ? Colors.black.withOpacity(0.06) 
+                                  : Colors.white.withOpacity(0.06), 
+                              width: 1,
+                            ),
+                          ),
                         ),
                         child: Row(
                           children: [
                             // Far Left Flank (Visual Identifier)
                             Container(
                               padding: const EdgeInsets.all(10),
-                              decoration: const BoxDecoration(
-                                color: _velvetSlate,
+                              decoration: BoxDecoration(
+                                color: _isLight ? Colors.black.withOpacity(0.04) : _velvetSlate,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
-                                color: isCredit ? _emeraldGreen : Colors.white60,
+                                color: isCredit ? _emeraldGreen : (_isLight ? Colors.black54 : Colors.white60),
                                 size: 16,
                               ),
                             ),
@@ -1170,7 +1177,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   Text(
                                     title,
                                     style: GoogleFonts.poppins(
-                                      color: Colors.white,
+                                      color: _isLight ? Colors.black87 : Colors.white,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13,
                                     ),
@@ -1181,7 +1188,7 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   Text(
                                     time,
                                     style: GoogleFonts.poppins(
-                                      color: Colors.white38,
+                                      color: _isLight ? Colors.black54 : Colors.white38,
                                       fontSize: 11,
                                     ),
                                     maxLines: 1,
@@ -1200,7 +1207,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                     ? '+${_formatBalance(amount)}'
                                     : '-${_formatBalance(amount.abs())}',
                                 style: GoogleFonts.robotoMono(
-                                  color: isCredit ? _emeraldGreen : Colors.white,
+                                  color: isCredit 
+                                      ? _emeraldGreen 
+                                      : (_isLight ? Colors.black87 : Colors.white),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13,
                                 ),
