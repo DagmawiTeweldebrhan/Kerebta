@@ -26,12 +26,16 @@ class _MarketTabState extends State<MarketTab>
 
   // Countdown timer state
   late Timer _countdownTimer;
-  Duration _countdownDuration = const Duration(days: 2, hours: 14, minutes: 5, seconds: 0);
+  Duration _countdownDuration =
+      const Duration(days: 2, hours: 14, minutes: 5, seconds: 0);
 
   // Search state
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<double> userWalletBalance = ValueNotifier<double>(1250.0);
+  final ValueNotifier<List<Map<String, dynamic>>> userPurchasedProducts =
+      ValueNotifier<List<Map<String, dynamic>>>(<Map<String, dynamic>>[]);
 
   @override
   void initState() {
@@ -61,6 +65,8 @@ class _MarketTabState extends State<MarketTab>
     _countdownTimer.cancel();
     _fadeController.dispose();
     _searchController.dispose();
+    userWalletBalance.dispose();
+    userPurchasedProducts.dispose();
     super.dispose();
   }
 
@@ -203,9 +209,12 @@ class _MarketTabState extends State<MarketTab>
 
   String _formatCountdown() {
     final d = _countdownDuration.inDays;
-    final h = _countdownDuration.inHours.remainder(24).toString().padLeft(2, '0');
-    final m = _countdownDuration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = _countdownDuration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final h =
+        _countdownDuration.inHours.remainder(24).toString().padLeft(2, '0');
+    final m =
+        _countdownDuration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s =
+        _countdownDuration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '${d.toString().padLeft(2, '0')}d : ${h}h : ${s}s';
   }
 
@@ -288,8 +297,9 @@ class _MarketTabState extends State<MarketTab>
                                         fontSize: 14,
                                       ),
                                       border: InputBorder.none,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          vertical: 12),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12),
                                     ),
                                   ),
                                 ),
@@ -344,17 +354,24 @@ class _MarketTabState extends State<MarketTab>
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.account_balance_wallet_rounded,
-                                            color: _goldAccent, size: 16),
+                                        Icon(
+                                            Icons
+                                                .account_balance_wallet_rounded,
+                                            color: _goldAccent,
+                                            size: 16),
                                         const SizedBox(width: 6),
-                                        Text(
-                                          '1,250 ETB',
-                                          style: GoogleFonts.poppins(
-                                            color: primaryText,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14,
-                                          ),
-                                        ),
+                                        ValueListenableBuilder<double>(
+                                            valueListenable: userWalletBalance,
+                                            builder: (context, balance, _) {
+                                              return Text(
+                                                '${balance.toStringAsFixed(0)} ETB',
+                                                style: GoogleFonts.poppins(
+                                                  color: primaryText,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 14,
+                                                ),
+                                              );
+                                            }),
                                       ],
                                     ),
                                   ),
@@ -401,7 +418,8 @@ class _MarketTabState extends State<MarketTab>
                                           color: primaryText, size: 20),
                                       padding: const EdgeInsets.all(8),
                                       constraints: const BoxConstraints(),
-                                      onPressed: () {},
+                                      onPressed: () =>
+                                          _showPurchasedSheet(context),
                                     ),
                                   ),
                                 ],
@@ -417,8 +435,8 @@ class _MarketTabState extends State<MarketTab>
               // ═══════════════════════════════════════════════════════════
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: Container(
@@ -428,14 +446,19 @@ class _MarketTabState extends State<MarketTab>
                         boxShadow: shadow,
                         gradient: LinearGradient(
                           colors: isDark
-                              ? [const Color(0xFF1B1B22), const Color(0xFF2A2535)]
-                              : [const Color(0xFFE8E0D0), const Color(0xFFFFF8EE)],
+                              ? [
+                                  const Color(0xFF1B1B22),
+                                  const Color(0xFF2A2535)
+                                ]
+                              : [
+                                  const Color(0xFFE8E0D0),
+                                  const Color(0xFFFFF8EE)
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         image: const DecorationImage(
-                          image:
-                              AssetImage('assets/images/drop_billboard.jpg'),
+                          image: AssetImage('assets/images/drop_billboard.jpg'),
                           fit: BoxFit.cover,
                           onError: _handleImageError,
                         ),
@@ -462,19 +485,16 @@ class _MarketTabState extends State<MarketTab>
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                      sigmaX: 8, sigmaY: 8),
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color:
-                                          Colors.black.withOpacity(0.35),
-                                      borderRadius:
-                                          BorderRadius.circular(12),
+                                      color: Colors.black.withOpacity(0.35),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                          color: Colors.white24,
-                                          width: 1),
+                                          color: Colors.white24, width: 1),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -511,18 +531,15 @@ class _MarketTabState extends State<MarketTab>
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
                                 child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                      sigmaX: 6, sigmaY: 6),
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color:
-                                          Colors.black.withOpacity(0.5),
-                                      borderRadius:
-                                          BorderRadius.circular(10),
-                                      border: Border.all(
-                                          color: Colors.white12),
+                                      color: Colors.black.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.white12),
                                     ),
                                     child: Text(
                                       _formatCountdown(),
@@ -544,8 +561,7 @@ class _MarketTabState extends State<MarketTab>
                               left: 18,
                               right: 18,
                               child: Row(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   // Left column: Title + artist
                                   Expanded(
@@ -566,8 +582,7 @@ class _MarketTabState extends State<MarketTab>
                                             letterSpacing: -0.3,
                                           ),
                                           maxLines: 2,
-                                          overflow:
-                                              TextOverflow.ellipsis,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -575,14 +590,13 @@ class _MarketTabState extends State<MarketTab>
                                               ? 'በሮፍናን · ልዩ ስብስብ'
                                               : 'by Rophnan · Exclusive Collection',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.white
-                                                .withOpacity(0.7),
+                                            color:
+                                                Colors.white.withOpacity(0.7),
                                             fontWeight: FontWeight.w500,
                                             fontSize: 12,
                                           ),
                                           maxLines: 1,
-                                          overflow:
-                                              TextOverflow.ellipsis,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ],
                                     ),
@@ -590,30 +604,37 @@ class _MarketTabState extends State<MarketTab>
                                   const SizedBox(width: 12),
                                   // Right: CTA Button
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      _showCheckoutSheet(context, {
+                                        'name':
+                                            'Rophnan "III" Limited Vinyl Set',
+                                        'nameAmh':
+                                            'ሮፍናን "III" Limited Vinyl Set',
+                                        'price': '3,800 ETB',
+                                        'priceValue': 3800,
+                                        'category': 'merch',
+                                        'image':
+                                            'assets/images/drop_billboard.jpg',
+                                        'tag': 'EXCLUSIVE DROP',
+                                      });
+                                    },
                                     child: Container(
-                                      padding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 20,
-                                              vertical: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
                                       decoration: BoxDecoration(
                                         color: _goldAccent,
-                                        borderRadius:
-                                            BorderRadius.circular(24),
+                                        borderRadius: BorderRadius.circular(24),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: _goldAccent
-                                                .withOpacity(0.35),
+                                            color:
+                                                _goldAccent.withOpacity(0.35),
                                             blurRadius: 12,
-                                            offset:
-                                                const Offset(0, 4),
+                                            offset: const Offset(0, 4),
                                           ),
                                         ],
                                       ),
                                       child: Text(
-                                        widget.isAmharic
-                                            ? 'ይያዙ'
-                                            : 'Claim Drop',
+                                        widget.isAmharic ? 'ይያዙ' : 'Claim Drop',
                                         style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.w800,
@@ -660,8 +681,7 @@ class _MarketTabState extends State<MarketTab>
                               });
                             },
                             child: AnimatedContainer(
-                              duration:
-                                  const Duration(milliseconds: 250),
+                              duration: const Duration(milliseconds: 250),
                               curve: Curves.easeInOut,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
@@ -671,16 +691,13 @@ class _MarketTabState extends State<MarketTab>
                                     : (isDark
                                         ? const Color(0xFF1E1E24)
                                         : const Color(0xFFE8E5E0)),
-                                borderRadius:
-                                    BorderRadius.circular(22),
+                                borderRadius: BorderRadius.circular(22),
                                 border: isSelected
                                     ? null
                                     : Border.all(
                                         color: isDark
-                                            ? Colors.white
-                                                .withOpacity(0.06)
-                                            : Colors.black
-                                                .withOpacity(0.06),
+                                            ? Colors.white.withOpacity(0.06)
+                                            : Colors.black.withOpacity(0.06),
                                         width: 1.0,
                                       ),
                               ),
@@ -692,8 +709,7 @@ class _MarketTabState extends State<MarketTab>
                                         ? Colors.black
                                         : (isDark
                                             ? Colors.white
-                                            : const Color(
-                                                0xFF444444)),
+                                            : const Color(0xFF444444)),
                                     fontWeight: isSelected
                                         ? FontWeight.w800
                                         : FontWeight.w500,
@@ -716,9 +732,11 @@ class _MarketTabState extends State<MarketTab>
               if (filtered.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 40),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 40, horizontal: 20),
                       decoration: BoxDecoration(
                         color: surfaceCard,
                         borderRadius: BorderRadius.circular(24),
@@ -781,7 +799,9 @@ class _MarketTabState extends State<MarketTab>
                                     horizontal: 24, vertical: 12),
                               ),
                               child: Text(
-                                widget.isAmharic ? 'የፍለጋ ቃሉን አጽዳ' : 'Clear Search',
+                                widget.isAmharic
+                                    ? 'የፍለጋ ቃሉን አጽዳ'
+                                    : 'Clear Search',
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13,
@@ -813,14 +833,12 @@ class _MarketTabState extends State<MarketTab>
 
                         if (isMerch) {
                           // ── Style A: Physical Merchandise Card ──
-                          return _buildMerchCard(
-                              item, isDark, surfaceCard, primaryText,
-                              secondaryText, shadow, border);
+                          return _buildMerchCard(item, isDark, surfaceCard,
+                              primaryText, secondaryText, shadow, border);
                         } else {
                           // ── Style B: Digital / Ticket Card ──
-                          return _buildDigitalCard(
-                              item, isDark, surfaceCard, primaryText,
-                              secondaryText, shadow, border);
+                          return _buildDigitalCard(item, isDark, surfaceCard,
+                              primaryText, secondaryText, shadow, border);
                         }
                       },
                       childCount: filtered.length,
@@ -869,8 +887,8 @@ class _MarketTabState extends State<MarketTab>
                 // Product image with fallback
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(24)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
                     gradient: LinearGradient(
                       colors: isDark
                           ? [const Color(0xFF1A1A20), const Color(0xFF252530)]
@@ -898,8 +916,8 @@ class _MarketTabState extends State<MarketTab>
                   top: 10,
                   left: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.55),
                       borderRadius: BorderRadius.circular(8),
@@ -962,15 +980,14 @@ class _MarketTabState extends State<MarketTab>
                       ),
                       const SizedBox(width: 6),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => _showCheckoutSheet(context, item),
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: _goldAccent.withOpacity(0.12),
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: _goldAccent.withOpacity(0.3),
-                                width: 1),
+                                color: _goldAccent.withOpacity(0.3), width: 1),
                           ),
                           child: const Icon(
                             Icons.add_shopping_cart_rounded,
@@ -1020,8 +1037,8 @@ class _MarketTabState extends State<MarketTab>
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(24)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
                     gradient: LinearGradient(
                       colors: isDark
                           ? [const Color(0xFF1A1422), const Color(0xFF221830)]
@@ -1050,8 +1067,8 @@ class _MarketTabState extends State<MarketTab>
                   top: 10,
                   left: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: _neonBlue.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(8),
@@ -1115,7 +1132,7 @@ class _MarketTabState extends State<MarketTab>
                   const SizedBox(height: 4),
                   // Buy Now pill
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => _showCheckoutSheet(context, item),
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -1153,6 +1170,545 @@ class _MarketTabState extends State<MarketTab>
           ),
         ],
       ),
+    );
+  }
+
+  void _showCheckoutSheet(BuildContext context, Map<String, dynamic> product) {
+    final BuildContext hostContext = context;
+    final ScaffoldMessengerState? hostMessenger =
+        ScaffoldMessenger.maybeOf(context);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color sheetBg = isDark ? const Color(0xFF141418) : Colors.white;
+    final Color primaryText = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final Color secondaryText =
+        isDark ? Colors.white70 : const Color(0xFF555555);
+
+    final String name = widget.isAmharic
+        ? (product['nameAmh'] ?? product['name'])
+        : product['name'];
+    final double price = (product['priceValue'] ?? 0).toDouble();
+    final String priceStr =
+        product['price'] ?? '${price.toStringAsFixed(0)} ETB';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: sheetBg,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
+              border: isDark
+                  ? Border(
+                      top: BorderSide(
+                          color: Colors.white.withOpacity(0.08), width: 1.0))
+                  : null,
+            ),
+            padding: EdgeInsets.fromLTRB(
+                24, 16, 24, MediaQuery.of(sheetContext).viewInsets.bottom + 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 4.5,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white24 : Colors.black12,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.isAmharic ? 'የክፍያ ማረጋገጫ' : 'Confirm Checkout',
+                      style: GoogleFonts.poppins(
+                        color: _goldAccent,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 20,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded,
+                          color: secondaryText, size: 20),
+                      onPressed: () => Navigator.pop(sheetContext),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.grey.withOpacity(0.1),
+                        image: DecorationImage(
+                          image: AssetImage(product['image'] as String),
+                          fit: BoxFit.cover,
+                          onError: (e, s) {},
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          product['category'] == 'ticket'
+                              ? Icons.confirmation_number_outlined
+                              : (product['category'] == 'digital'
+                                  ? Icons.music_note_rounded
+                                  : Icons.shopping_bag_outlined),
+                          color: _goldAccent.withOpacity(0.3),
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: GoogleFonts.poppins(
+                              color: primaryText,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _neonBlue.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              (product['tag'] as String? ?? 'ITEM')
+                                  .toUpperCase(),
+                              style: GoogleFonts.poppins(
+                                color: _neonBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Divider(
+                    color: isDark ? Colors.white10 : Colors.black12,
+                    thickness: 1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.isAmharic ? 'የኪስ ሂሳብ ቀሪ' : 'Your Wallet Balance',
+                      style: GoogleFonts.poppins(
+                        color: secondaryText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    ValueListenableBuilder<double>(
+                        valueListenable: userWalletBalance,
+                        builder: (valueContext, balance, _) {
+                          return Text(
+                            'ETB ${balance.toStringAsFixed(2)}',
+                            style: GoogleFonts.robotoMono(
+                              color: primaryText,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          );
+                        }),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.isAmharic ? 'ዋጋ' : 'Total Price',
+                      style: GoogleFonts.poppins(
+                        color: secondaryText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      priceStr,
+                      style: GoogleFonts.robotoMono(
+                        color: _neonBlue,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                ValueListenableBuilder<double>(
+                    valueListenable: userWalletBalance,
+                    builder: (valueContext, balance, _) {
+                      final bool hasEnough = balance >= price;
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                hasEnough ? _goldAccent : Colors.redAccent,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: () {
+                            if (!hasEnough) {
+                              hostMessenger?.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    widget.isAmharic
+                                        ? 'ይቅርታ፣ ክፍያ ለመፈጸም በቂ የኪስ ሂሳብ ቀሪ የለዎትም!'
+                                        : 'Insufficient wallet balance! Please top up.',
+                                  ),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                              return;
+                            }
+                            userWalletBalance.value -= price;
+                            userPurchasedProducts.value =
+                                List.from(userPurchasedProducts.value)
+                                  ..add({
+                                    'name': product['name'],
+                                    'nameAmh':
+                                        product['nameAmh'] ?? product['name'],
+                                    'price': product['price'],
+                                    'priceValue': product['priceValue'],
+                                    'category': product['category'],
+                                    'image': product['image'],
+                                    'tag': product['tag'],
+                                    'purchaseDate':
+                                        DateTime.now().toIso8601String(),
+                                  });
+
+                            Navigator.pop(sheetContext);
+                            if (mounted) {
+                              _showSuccessPurchaseSheet(hostContext, product);
+                            }
+                          },
+                          child: Text(
+                            hasEnough
+                                ? (widget.isAmharic
+                                    ? 'ግዢውን አረጋግጥ'
+                                    : 'Confirm Purchase')
+                                : (widget.isAmharic
+                                    ? 'በቂ ሂሳብ የለም'
+                                    : 'Insufficient Funds'),
+                            style: GoogleFonts.poppins(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSuccessPurchaseSheet(
+      BuildContext context, Map<String, dynamic> product) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color sheetBg = isDark ? const Color(0xFF141418) : Colors.white;
+    final Color primaryText = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final Color secondaryText =
+        isDark ? Colors.white70 : const Color(0xFF555555);
+
+    final String name = widget.isAmharic
+        ? (product['nameAmh'] ?? product['name'])
+        : product['name'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: sheetBg,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
+              border: isDark
+                  ? Border(
+                      top: BorderSide(
+                          color: Colors.white.withOpacity(0.08), width: 1.0))
+                  : null,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00E676).withOpacity(0.12),
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: const Color(0xFF00E676), width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF00E676),
+                    size: 48,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  widget.isAmharic ? 'ግዢው ተሳክቷል!' : 'Purchase Successful!',
+                  style: GoogleFonts.poppins(
+                    color: primaryText,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  widget.isAmharic
+                      ? '“$name” በተሳካ ሁኔታ ገዝተዋል። በፕሮፋይልዎ ላይ ማግኘት ይችላሉ።'
+                      : 'You have successfully purchased "$name". Find it inside your Profile tab.',
+                  style: GoogleFonts.poppins(
+                    color: secondaryText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _goldAccent,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      widget.isAmharic ? 'እሺ' : 'Awesome',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showPurchasedSheet(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color sheetBg = isDark ? const Color(0xFF141418) : Colors.white;
+    final Color primaryText = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final Color secondaryText =
+        isDark ? Colors.white70 : const Color(0xFF555555);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: sheetBg,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(28.0)),
+              border: isDark
+                  ? Border(
+                      top: BorderSide(
+                          color: Colors.white.withOpacity(0.08), width: 1.0))
+                  : null,
+            ),
+            padding: const EdgeInsets.all(24),
+            child: ValueListenableBuilder<List<Map<String, dynamic>>>(
+                valueListenable: userPurchasedProducts,
+                builder: (context, purchased, _) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4.5,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white24 : Colors.black12,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.isAmharic
+                                ? 'የእኔ ትዕዛዞች / ትኬቶች'
+                                : 'My Orders & Tickets',
+                            style: GoogleFonts.poppins(
+                              color: _goldAccent,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 20,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close_rounded,
+                                color: secondaryText, size: 20),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      if (purchased.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 36.0),
+                            child: Column(
+                              children: [
+                                Icon(Icons.shopping_bag_outlined,
+                                    color: secondaryText.withOpacity(0.3),
+                                    size: 48),
+                                const SizedBox(height: 12),
+                                Text(
+                                  widget.isAmharic
+                                      ? 'ምንም ግዢ የለም'
+                                      : 'No purchases yet',
+                                  style: GoogleFonts.poppins(
+                                    color: secondaryText,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Container(
+                          constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.4),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: purchased.length,
+                            separatorBuilder: (context, index) => Divider(
+                                color: isDark ? Colors.white10 : Colors.black12,
+                                height: 1),
+                            itemBuilder: (context, index) {
+                              final item = purchased[index];
+                              final String name = widget.isAmharic
+                                  ? (item['nameAmh'] ?? item['name'])
+                                  : item['name'];
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    item['image'] as String,
+                                    width: 44,
+                                    height: 44,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      width: 44,
+                                      height: 44,
+                                      color: Colors.grey.withOpacity(0.1),
+                                      child: Icon(Icons.shopping_bag_outlined,
+                                          color: _goldAccent, size: 20),
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  name,
+                                  style: GoogleFonts.poppins(
+                                    color: primaryText,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  item['price'] as String? ?? '',
+                                  style: GoogleFonts.robotoMono(
+                                    color: _neonBlue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    widget.isAmharic ? 'የተገዛ' : 'PURCHASED',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 9,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }),
+          ),
+        );
+      },
     );
   }
 }

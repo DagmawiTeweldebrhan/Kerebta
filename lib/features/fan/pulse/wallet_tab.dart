@@ -16,7 +16,8 @@ class WalletTab extends StatefulWidget {
   State<WalletTab> createState() => _WalletTabState();
 }
 
-class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMixin {
+class _WalletTabState extends State<WalletTab>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _fadeAnimation;
 
@@ -60,7 +61,6 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
   // Light mode colors
   static const Color _scaffoldBgLight = Color(0xFFF6F6F9);
   static const Color _surfaceCardLight = Colors.white;
-
 
   // ── Mock Ledger Data ──
   final List<Map<String, dynamic>> _ledger = [
@@ -147,21 +147,27 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                 icon: Icons.phone_android_rounded,
                 iconColor: const Color(0xFFE21A83),
                 title: 'Telebirr',
-                subtitle: widget.isAmharic ? 'ቅጽበታዊ የሞባይል ክፍያ' : 'Instant mobile money',
+                subtitle: widget.isAmharic
+                    ? 'ቅጽበታዊ የሞባይል ክፍያ'
+                    : 'Instant mobile money',
                 onTap: () => _handleMockPaymentSubmit(context, 'Telebirr'),
               ),
               _buildModalListOption(
                 icon: Icons.account_balance_rounded,
                 iconColor: Colors.purple,
                 title: 'CBE Birr / Bank Transfer',
-                subtitle: widget.isAmharic ? 'ከባንክ ሂሳብዎ በቀጥታ' : 'Directly from bank account',
+                subtitle: widget.isAmharic
+                    ? 'ከባንክ ሂሳብዎ በቀጥታ'
+                    : 'Directly from bank account',
                 onTap: () => _handleMockPaymentSubmit(context, 'CBE'),
               ),
               _buildModalListOption(
                 icon: Icons.credit_card_rounded,
                 iconColor: _goldAccent,
                 title: 'Chapa (Card / International)',
-                subtitle: widget.isAmharic ? 'ቪዛ፣ ማስተርካርድ፣ አፕል ፔይ' : 'Visa, Mastercard, Apple Pay',
+                subtitle: widget.isAmharic
+                    ? 'ቪዛ፣ ማስተርካርድ፣ አፕል ፔይ'
+                    : 'Visa, Mastercard, Apple Pay',
                 onTap: () => _handleMockPaymentSubmit(context, 'Chapa'),
               ),
               const SizedBox(height: 20),
@@ -190,7 +196,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.isAmharic ? 'የፈጣሪ ስም ወይም መለያ ያስገቡ' : 'Search creator handle',
+                    widget.isAmharic
+                        ? 'የፈጣሪ ስም ወይም መለያ ያስገቡ'
+                        : 'Search creator handle',
                     style: GoogleFonts.poppins(
                       color: Colors.white70,
                       fontSize: 13,
@@ -210,7 +218,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: TextField(
                       controller: searchController,
-                      style: GoogleFonts.poppins(color: Colors.white, fontSize: 14),
+                      style: GoogleFonts.poppins(
+                          color: Colors.white, fontSize: 14),
                       onChanged: (val) {
                         setModalState(() {
                           selectedCreator = val;
@@ -218,16 +227,20 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       },
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        icon: const Icon(Icons.search_rounded, color: _goldAccent, size: 20),
+                        icon: const Icon(Icons.search_rounded,
+                            color: _goldAccent, size: 20),
                         hintText: '@handle',
-                        hintStyle: GoogleFonts.poppins(color: Colors.white30, fontSize: 14),
+                        hintStyle: GoogleFonts.poppins(
+                            color: Colors.white30, fontSize: 14),
                       ),
                     ),
                   ),
                   if (selectedCreator.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     Text(
-                      widget.isAmharic ? 'የመላኪያ መጠን (ETB)' : 'Amount to Send (ETB)',
+                      widget.isAmharic
+                          ? 'የመላኪያ መጠን (ETB)'
+                          : 'Amount to Send (ETB)',
                       style: GoogleFonts.poppins(
                         color: Colors.white70,
                         fontSize: 13,
@@ -256,7 +269,10 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           prefixText: 'ETB ',
-                          prefixStyle: TextStyle(color: _emeraldGreen, fontSize: 18, fontWeight: FontWeight.bold),
+                          prefixStyle: TextStyle(
+                              color: _emeraldGreen,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -283,7 +299,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                           );
                         },
                         child: Text(
-                          widget.isAmharic ? 'ማስተላለፍ አረጋግጥ' : 'Confirm Transfer',
+                          widget.isAmharic
+                              ? 'ማስተላለፍ አረጋግጥ'
+                              : 'Confirm Transfer',
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
@@ -315,7 +333,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.isAmharic ? 'ወደ ባንክ ሂሳብ ማስተላለፊያ' : 'Transfer straight to your local bank account',
+                widget.isAmharic
+                    ? 'ወደ ባንክ ሂሳብ ማስተላለፊያ'
+                    : 'Transfer straight to your local bank account',
                 style: GoogleFonts.poppins(
                   color: Colors.white70,
                   fontSize: 13,
@@ -329,7 +349,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.purple.withOpacity(0.2), width: 1),
+                  border: Border.all(
+                      color: Colors.purple.withOpacity(0.2), width: 1),
                 ),
                 child: Row(
                   children: [
@@ -339,7 +360,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                         color: Colors.purple,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 20),
+                      child: const Icon(Icons.account_balance_rounded,
+                          color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -370,7 +392,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
               ),
               const SizedBox(height: 20),
               Text(
-                widget.isAmharic ? 'የገንዘብ መጠን (ETB)' : 'Amount to Cash Out (ETB)',
+                widget.isAmharic
+                    ? 'የገንዘብ መጠን (ETB)'
+                    : 'Amount to Cash Out (ETB)',
                 style: GoogleFonts.poppins(
                   color: Colors.white70,
                   fontSize: 13,
@@ -399,7 +423,10 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     prefixText: 'ETB ',
-                    prefixStyle: TextStyle(color: _neonBlue, fontSize: 18, fontWeight: FontWeight.bold),
+                    prefixStyle: TextStyle(
+                        color: _neonBlue,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -498,7 +525,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                         _buildScannerCorner(Alignment.bottomLeft),
                         _buildScannerCorner(Alignment.bottomRight),
                         // Scanner Icon
-                        const Icon(Icons.qr_code_scanner_rounded, color: Colors.white24, size: 80),
+                        const Icon(Icons.qr_code_scanner_rounded,
+                            color: Colors.white24, size: 80),
                         // Pulsing neon line
                         _buildPulsingScanLine(),
                       ],
@@ -527,7 +555,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                         );
                       },
                       child: Text(
-                        widget.isAmharic ? 'የማሳያ ኮድ ተጠቀም' : 'Redeem Demo Voucher',
+                        widget.isAmharic
+                            ? 'የማሳያ ኮድ ተጠቀም'
+                            : 'Redeem Demo Voucher',
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w800,
                           fontSize: 14,
@@ -550,7 +580,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
   }
 
   // ── Helper builders for sheets ──
-  Widget _buildActionModalWrapper({required String title, required Widget child}) {
+  Widget _buildActionModalWrapper(
+      {required String title, required Widget child}) {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF141418),
@@ -559,7 +590,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
           top: BorderSide(color: Colors.white12, width: 1),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+          24, 16, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -589,7 +621,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 20),
+                icon: const Icon(Icons.close_rounded,
+                    color: Colors.white60, size: 20),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -640,7 +673,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
             fontSize: 13,
           ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white30),
+        trailing:
+            const Icon(Icons.chevron_right_rounded, color: Colors.white30),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onTap: onTap,
       ),
@@ -657,8 +691,12 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
     );
   }
 
-  void _showSuccessBanner(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+  void _showSuccessBanner(BuildContext contextRef, String message) {
+    if (!mounted) return;
+    final ScaffoldMessengerState? messenger =
+        ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger.showSnackBar(
       SnackBar(
         backgroundColor: _emeraldGreen,
         duration: const Duration(seconds: 4),
@@ -667,7 +705,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
         margin: const EdgeInsets.all(16),
         content: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.black, size: 24),
+            const Icon(Icons.check_circle_rounded,
+                color: Colors.black, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -695,16 +734,20 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border(
-            top: alignment == Alignment.topLeft || alignment == Alignment.topRight
+            top: alignment == Alignment.topLeft ||
+                    alignment == Alignment.topRight
                 ? const BorderSide(color: _goldAccent, width: 3)
                 : BorderSide.none,
-            bottom: alignment == Alignment.bottomLeft || alignment == Alignment.bottomRight
+            bottom: alignment == Alignment.bottomLeft ||
+                    alignment == Alignment.bottomRight
                 ? const BorderSide(color: _goldAccent, width: 3)
                 : BorderSide.none,
-            left: alignment == Alignment.topLeft || alignment == Alignment.bottomLeft
+            left: alignment == Alignment.topLeft ||
+                    alignment == Alignment.bottomLeft
                 ? const BorderSide(color: _goldAccent, width: 3)
                 : BorderSide.none,
-            right: alignment == Alignment.topRight || alignment == Alignment.bottomRight
+            right: alignment == Alignment.topRight ||
+                    alignment == Alignment.bottomRight
                 ? const BorderSide(color: _goldAccent, width: 3)
                 : BorderSide.none,
           ),
@@ -755,7 +798,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 20),
+                          icon: const Icon(Icons.receipt_long_rounded,
+                              color: Colors.white, size: 20),
                           padding: const EdgeInsets.all(10),
                           constraints: const BoxConstraints(),
                           onPressed: () {
@@ -778,7 +822,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
               // ═══════════════════════════════════════════════════════════
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: AspectRatio(
                     aspectRatio: 1.6,
                     child: Container(
@@ -791,10 +836,12 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                           end: Alignment.bottomRight,
                         ),
                       ),
-                      padding: const EdgeInsets.all(1.5), // Multi-layered border thickness
+                      padding: const EdgeInsets.all(
+                          1.5), // Multi-layered border thickness
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _isLight ? _surfaceCardLight : _surfaceCardDark,
+                          color:
+                              _isLight ? _surfaceCardLight : _surfaceCardDark,
                           borderRadius: BorderRadius.circular(22.5),
                         ),
                         child: ClipRRect(
@@ -809,17 +856,17 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   width: 220,
                                   height: 220,
                                   decoration: BoxDecoration(
-                                      color: _goldAccent.withOpacity(0.08),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: _goldAccent.withOpacity(0.4),
-                                          blurRadius: 60,
-                                          spreadRadius: 0,
-                                          offset: Offset.zero,
-                                        ),
-                                      ],
-                                    ),
+                                    color: _goldAccent.withOpacity(0.08),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: _goldAccent.withOpacity(0.4),
+                                        blurRadius: 60,
+                                        spreadRadius: 0,
+                                        offset: Offset.zero,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               Positioned(
@@ -829,17 +876,17 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   width: 240,
                                   height: 240,
                                   decoration: BoxDecoration(
-                                        color: _neonBlue.withOpacity(0.08),
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: _neonBlue.withOpacity(0.4),
-                                            blurRadius: 60,
-                                            spreadRadius: 0,
-                                            offset: Offset.zero,
-                                          ),
-                                        ],
+                                    color: _neonBlue.withOpacity(0.08),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: _neonBlue.withOpacity(0.4),
+                                        blurRadius: 60,
+                                        spreadRadius: 0,
+                                        offset: Offset.zero,
                                       ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               // Core content layout
@@ -847,11 +894,13 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                 padding: const EdgeInsets.all(22),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     // Top Cluster: Fingerprint & Label
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         const Icon(
                                           Icons.fingerprint_rounded,
@@ -861,7 +910,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                         Text(
                                           'KEREBTA VAULT',
                                           style: GoogleFonts.poppins(
-                                            color: _isLight ? Colors.black54 : Colors.white54,
+                                            color: _isLight
+                                                ? Colors.black54
+                                                : Colors.white54,
                                             fontWeight: FontWeight.w900,
                                             fontSize: 10,
                                             letterSpacing: 2.0,
@@ -871,12 +922,17 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                     ),
                                     // Center Balance Area with security eye toggle
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          widget.isAmharic ? 'የኪስ ሂሳብ ቀሪ' : 'Available Balance',
+                                          widget.isAmharic
+                                              ? 'የኪስ ሂሳብ ቀሪ'
+                                              : 'Available Balance',
                                           style: GoogleFonts.poppins(
-                                            color: _isLight ? Colors.black38 : Colors.white38,
+                                            color: _isLight
+                                                ? Colors.black38
+                                                : Colors.white38,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 11,
                                             letterSpacing: 0.5,
@@ -889,7 +945,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                               child: Text(
                                                 _formatBalance(1250.00),
                                                 style: GoogleFonts.robotoMono(
-                                                  color: _isLight ? Colors.black : Colors.white,
+                                                  color: _isLight
+                                                      ? Colors.black
+                                                      : Colors.white,
                                                   fontWeight: FontWeight.w900,
                                                   fontSize: 26,
                                                   letterSpacing: -0.5,
@@ -903,16 +961,20 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                             GestureDetector(
                                               onTap: () {
                                                 setState(() {
-                                                  _isBalanceVisible = !_isBalanceVisible;
+                                                  _isBalanceVisible =
+                                                      !_isBalanceVisible;
                                                 });
                                               },
                                               child: AnimatedSwitcher(
-                                                duration: const Duration(milliseconds: 200),
+                                                duration: const Duration(
+                                                    milliseconds: 200),
                                                 child: Icon(
                                                   _isBalanceVisible
                                                       ? Icons.visibility_rounded
-                                                      : Icons.visibility_off_rounded,
-                                                  key: ValueKey(_isBalanceVisible),
+                                                      : Icons
+                                                          .visibility_off_rounded,
+                                                  key: ValueKey(
+                                                      _isBalanceVisible),
                                                   color: _goldAccent,
                                                   size: 22,
                                                 ),
@@ -924,13 +986,16 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                     ),
                                     // Bottom Card Profile Cluster
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
                                             '@abeni_music',
                                             style: GoogleFonts.poppins(
-                                              color: _isLight ? Colors.black87 : Colors.white70,
+                                              color: _isLight
+                                                  ? Colors.black87
+                                                  : Colors.white70,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 13,
                                             ),
@@ -940,17 +1005,25 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                         ),
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: _emeraldGreen.withOpacity(0.12),
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(color: _emeraldGreen.withOpacity(0.25), width: 1),
+                                            color:
+                                                _emeraldGreen.withOpacity(0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: _emeraldGreen
+                                                    .withOpacity(0.25),
+                                                width: 1),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
-                                                widget.isAmharic ? 'የተረጋገጠ ፈጣሪ' : 'Verified Creator',
+                                                widget.isAmharic
+                                                    ? 'የተረጋገጠ ፈጣሪ'
+                                                    : 'Verified Creator',
                                                 style: GoogleFonts.poppins(
                                                   color: _emeraldGreen,
                                                   fontWeight: FontWeight.w800,
@@ -958,7 +1031,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                                 ),
                                               ),
                                               const SizedBox(width: 4),
-                                              const Icon(Icons.verified_rounded, color: _emeraldGreen, size: 10),
+                                              const Icon(Icons.verified_rounded,
+                                                  color: _emeraldGreen,
+                                                  size: 10),
                                             ],
                                           ),
                                         ),
@@ -981,7 +1056,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
               // ═══════════════════════════════════════════════════════════
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1022,7 +1098,8 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
                       child: Text(
                         widget.isAmharic ? 'የተገናኙ ሂሳቦች' : 'Linked Accounts',
                         style: GoogleFonts.poppins(
@@ -1044,14 +1121,20 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                           // Telebirr Link Module
                           _buildLinkedAccountCard(
                             logoColor: const Color(0xFFE21A83),
-                            gradientColors: [const Color(0xFF3A0D25), const Color(0xFF1F0815)],
+                            gradientColors: [
+                              const Color(0xFF3A0D25),
+                              const Color(0xFF1F0815)
+                            ],
                             brandName: 'Telebirr',
                             accountMask: '09****4321',
                           ),
                           // Commercial Bank of Ethiopia (CBE) Module
                           _buildLinkedAccountCard(
                             logoColor: Colors.purple,
-                            gradientColors: [const Color(0xFF220835), const Color(0xFF140520)],
+                            gradientColors: [
+                              const Color(0xFF220835),
+                              const Color(0xFF140520)
+                            ],
                             brandName: 'CBE Bank',
                             accountMask: 'Abeni - Checking',
                           ),
@@ -1073,11 +1156,13 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                 border: Border.all(
                                   color: Colors.white12,
                                   width: 1.5,
-                                  style: BorderStyle.solid, // Simulated dotted look with clean borders
+                                  style: BorderStyle
+                                      .solid, // Simulated dotted look with clean borders
                                 ),
                               ),
                               child: const Center(
-                                child: Icon(Icons.add_rounded, color: _goldAccent, size: 24),
+                                child: Icon(Icons.add_rounded,
+                                    color: _goldAccent, size: 24),
                               ),
                             ),
                           ),
@@ -1098,7 +1183,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        widget.isAmharic ? 'የቅርብ ጊዜ እንቅስቃሴዎች' : 'Recent Activity',
+                        widget.isAmharic
+                            ? 'የቅርብ ጊዜ እንቅስቃሴዎች'
+                            : 'Recent Activity',
                         style: GoogleFonts.poppins(
                           color: _isLight ? Colors.black87 : Colors.white,
                           fontWeight: FontWeight.w800,
@@ -1138,17 +1225,22 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                       final item = _ledger[index];
                       final bool isCredit = item['isCredit'] as bool;
                       final double amount = item['amount'] as double;
-                      final String title = widget.isAmharic ? item['titleAmh'] as String : item['title'] as String;
-                      final String time = widget.isAmharic ? item['timeAmh'] as String : item['time'] as String;
+                      final String title = widget.isAmharic
+                          ? item['titleAmh'] as String
+                          : item['title'] as String;
+                      final String time = widget.isAmharic
+                          ? item['timeAmh'] as String
+                          : item['time'] as String;
 
                       return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 4),
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: _isLight 
-                                  ? Colors.black.withOpacity(0.06) 
-                                  : Colors.white.withOpacity(0.06), 
+                              color: _isLight
+                                  ? Colors.black.withOpacity(0.06)
+                                  : Colors.white.withOpacity(0.06),
                               width: 1,
                             ),
                           ),
@@ -1159,12 +1251,20 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: _isLight ? Colors.black.withOpacity(0.04) : _velvetSlate,
+                                color: _isLight
+                                    ? Colors.black.withOpacity(0.04)
+                                    : _velvetSlate,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                isCredit ? Icons.south_west_rounded : Icons.north_east_rounded,
-                                color: isCredit ? _emeraldGreen : (_isLight ? Colors.black54 : Colors.white60),
+                                isCredit
+                                    ? Icons.south_west_rounded
+                                    : Icons.north_east_rounded,
+                                color: isCredit
+                                    ? _emeraldGreen
+                                    : (_isLight
+                                        ? Colors.black54
+                                        : Colors.white60),
                                 size: 16,
                               ),
                             ),
@@ -1177,7 +1277,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   Text(
                                     title,
                                     style: GoogleFonts.poppins(
-                                      color: _isLight ? Colors.black87 : Colors.white,
+                                      color: _isLight
+                                          ? Colors.black87
+                                          : Colors.white,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13,
                                     ),
@@ -1188,7 +1290,9 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                   Text(
                                     time,
                                     style: GoogleFonts.poppins(
-                                      color: _isLight ? Colors.black54 : Colors.white38,
+                                      color: _isLight
+                                          ? Colors.black54
+                                          : Colors.white38,
                                       fontSize: 11,
                                     ),
                                     maxLines: 1,
@@ -1207,9 +1311,11 @@ class _WalletTabState extends State<WalletTab> with SingleTickerProviderStateMix
                                     ? '+${_formatBalance(amount)}'
                                     : '-${_formatBalance(amount.abs())}',
                                 style: GoogleFonts.robotoMono(
-                                  color: isCredit 
-                                      ? _emeraldGreen 
-                                      : (_isLight ? Colors.black87 : Colors.white),
+                                  color: isCredit
+                                      ? _emeraldGreen
+                                      : (_isLight
+                                          ? Colors.black87
+                                          : Colors.white),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13,
                                 ),
@@ -1357,7 +1463,8 @@ class _ScannerLineAnim extends StatefulWidget {
   State<_ScannerLineAnim> createState() => _ScannerLineAnimState();
 }
 
-class _ScannerLineAnimState extends State<_ScannerLineAnim> with SingleTickerProviderStateMixin {
+class _ScannerLineAnimState extends State<_ScannerLineAnim>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _scanController;
   late final Animation<double> _scanAnimation;
 
