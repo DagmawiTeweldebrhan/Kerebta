@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../shared/onboarding/onboarding_carousel.dart';
 
 /// Fan Profile Tab (መገለጫ) for the Kerebta (ቀረብታ) platform.
 ///
@@ -794,6 +795,11 @@ class _ProfileTabState extends State<ProfileTab>
                       backgroundColor: _colorVividRed,
                     ),
                   );
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const OnboardingCarousel()),
+                    (route) => false,
+                  );
                 },
                 child: Text(
                   _textLogOut,
@@ -871,6 +877,7 @@ class _ProfileTabState extends State<ProfileTab>
                   title: widget.isAmharic
                       ? 'የመለያ መረጃ ማስተካከያ'
                       : 'Edit Account Details',
+                  onTap: _showEditAccountDialog,
                 ),
                 _buildDivider(),
                 _buildSettingsOption(
@@ -878,6 +885,7 @@ class _ProfileTabState extends State<ProfileTab>
                   title: widget.isAmharic
                       ? 'የማሳወቂያ ምርጫዎች'
                       : 'Notification Preferences',
+                  onTap: _showNotificationDialog,
                 ),
                 _buildDivider(),
                 _buildSettingsOption(
@@ -885,11 +893,13 @@ class _ProfileTabState extends State<ProfileTab>
                   title: widget.isAmharic
                       ? 'ደህንነት እና ግላዊነት'
                       : 'Security & Privacy',
+                  onTap: _showSecurityDialog,
                 ),
                 _buildDivider(),
                 _buildSettingsOption(
                   icon: Icons.help_outline_rounded,
                   title: widget.isAmharic ? 'እገዛ እና ድጋፍ' : 'Help & Support',
+                  onTap: _showHelpDialog,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -901,7 +911,11 @@ class _ProfileTabState extends State<ProfileTab>
   }
 
   // Interactive settings items builder
-  Widget _buildSettingsOption({required IconData icon, required String title}) {
+  Widget _buildSettingsOption({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(icon, color: _colorNeonBlue),
       title: Text(
@@ -913,18 +927,191 @@ class _ProfileTabState extends State<ProfileTab>
         ),
       ),
       trailing: Icon(Icons.chevron_right, color: _colorSecondaryText),
-      onTap: () {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.isAmharic
-                  ? '$title በቅርቡ ይቀርባል!'
-                  : '$title is coming soon!',
-            ),
-            backgroundColor: _colorNeonBlue,
-            duration: const Duration(seconds: 1),
+      onTap: onTap,
+    );
+  }
+
+  void _showEditAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: _colorCardSurface,
+          title: Text(
+            widget.isAmharic ? 'መለያ ያርትዑ' : 'Edit Account',
+            style: GoogleFonts.poppins(color: _colorPrimaryText),
           ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  labelText: widget.isAmharic ? 'ስም' : 'Name',
+                  labelStyle: TextStyle(color: _colorSecondaryText),
+                ),
+                style: TextStyle(color: _colorPrimaryText),
+              ),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: widget.isAmharic ? 'ኢሜይል' : 'Email',
+                  labelStyle: TextStyle(color: _colorSecondaryText),
+                ),
+                style: TextStyle(color: _colorPrimaryText),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(widget.isAmharic ? 'ሰርዝ' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(widget.isAmharic ? 'ተቀምጧል' : 'Saved')),
+                );
+              },
+              child: Text(widget.isAmharic ? 'አስቀምጥ' : 'Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNotificationDialog() {
+    bool pushEnabled = true;
+    bool emailEnabled = false;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: _colorCardSurface,
+              title: Text(
+                widget.isAmharic ? 'ማሳወቂያዎች' : 'Notifications',
+                style: GoogleFonts.poppins(color: _colorPrimaryText),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    title: Text(
+                      widget.isAmharic ? 'ግፊት ማሳወቂያዎች' : 'Push Notifications',
+                      style: TextStyle(color: _colorPrimaryText),
+                    ),
+                    value: pushEnabled,
+                    onChanged: (val) => setState(() => pushEnabled = val),
+                    activeColor: _colorGoldAccent,
+                  ),
+                  SwitchListTile(
+                    title: Text(
+                      widget.isAmharic ? 'የኢሜይል ማሳወቂያዎች' : 'Email Notifications',
+                      style: TextStyle(color: _colorPrimaryText),
+                    ),
+                    value: emailEnabled,
+                    onChanged: (val) => setState(() => emailEnabled = val),
+                    activeColor: _colorGoldAccent,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(widget.isAmharic ? 'ዝጋ' : 'Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showSecurityDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: _colorCardSurface,
+          title: Text(
+            widget.isAmharic ? 'ደህንነት' : 'Security',
+            style: GoogleFonts.poppins(color: _colorPrimaryText),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.password, color: _colorGoldAccent),
+                title: Text(
+                  widget.isAmharic ? 'የይለፍ ቃል ቀይር' : 'Change Password',
+                  style: TextStyle(color: _colorPrimaryText),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Password change emailed!')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.verified_user, color: _colorGoldAccent),
+                title: Text(
+                  widget.isAmharic ? 'ባለሁለት ደረጃ ማረጋገጫ' : 'Two-Factor Auth',
+                  style: TextStyle(color: _colorPrimaryText),
+                ),
+                trailing: Switch(value: false, onChanged: (v) {}),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(widget.isAmharic ? 'ዝጋ' : 'Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: _colorCardSurface,
+          title: Text(
+            widget.isAmharic ? 'እገዛ እና ድጋፍ' : 'Help & Support',
+            style: GoogleFonts.poppins(color: _colorPrimaryText),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.email, color: _colorGoldAccent),
+                title: Text(
+                  widget.isAmharic ? 'ድጋፍን ያግኙ' : 'Contact Support',
+                  style: TextStyle(color: _colorPrimaryText),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.question_answer, color: _colorGoldAccent),
+                title: Text(
+                  widget.isAmharic ? 'ተደጋጋሚ ጥያቄዎች' : 'FAQs',
+                  style: TextStyle(color: _colorPrimaryText),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(widget.isAmharic ? 'ዝጋ' : 'Close'),
+            ),
+          ],
         );
       },
     );

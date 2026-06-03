@@ -6,6 +6,7 @@ import '../../../app.dart';
 import '../../../services/auth_service.dart';
 import 'sign_up_screen.dart';
 import '../../fan/pulse/home_feed_page.dart';
+import '../../creator/dashboard/creator_dashboard_page.dart';
 
 class OnboardingCarousel extends StatefulWidget {
   const OnboardingCarousel({Key? key}) : super(key: key);
@@ -141,6 +142,80 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
     } finally {
       if (mounted) setState(() => _socialLoading = false);
     }
+  }
+
+  void _showRoleSelectionDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final isLightMode = Theme.of(context).brightness == Brightness.light;
+        final bgColor = isLightMode ? Colors.white : const Color(0xFF1A1A1A);
+        final textColor = isLightMode ? const Color(0xFF1A1A1A) : Colors.white;
+        final goldColor = isLightMode ? const Color(0xFFA67C00) : Theme.of(context).primaryColor;
+
+        return Container(
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isAmharic ? "እንዴት መግባት ይፈልጋሉ?" : "How would you like to login?",
+                style: GoogleFonts.poppins(color: textColor, fontSize: 18.0, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24.0),
+              SizedBox(
+                width: double.infinity,
+                height: 56.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeFeedPage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: goldColor,
+                    foregroundColor: AppColors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  ),
+                  child: Text(isAmharic ? "እንደ አድናቂ ይግቡ" : "Login as Fan", style: GoogleFonts.poppins(fontSize: 16.0, fontWeight: FontWeight.w700)),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              SizedBox(
+                width: double.infinity,
+                height: 56.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CreatorDashboardPage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: goldColor,
+                    side: BorderSide(color: goldColor, width: 2.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                    elevation: 0,
+                  ),
+                  child: Text(isAmharic ? "እንደ ፈጣሪ ይግቡ" : "Login as Creator", style: GoogleFonts.poppins(fontSize: 16.0, fontWeight: FontWeight.w700)),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -450,10 +525,7 @@ class _OnboardingCarouselState extends State<OnboardingCarousel> with TickerProv
                                                         if (!_isValid) {
                                                           _triggerError(); // Anti-Gravity Warning
                                                         } else {
-                                                          Navigator.pushReplacement(
-                                                            context,
-                                                            MaterialPageRoute(builder: (_) => const HomeFeedPage()),
-                                                          );
+                                                          _showRoleSelectionDialog();
                                                         }
                                                       },
                                                       style: ElevatedButton.styleFrom(

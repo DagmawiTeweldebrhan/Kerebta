@@ -822,229 +822,195 @@ class _CreatorHubPageState extends State<CreatorHubPage> {
       case _CreatorContentType.dm:
         return SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _stroke(isDark), width: 1),
-              ),
-              child: Column(
-                children: [
-                  Row(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: Column(
+              children: [
+                // Minimal header
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 18,
+                        radius: 20,
                         backgroundColor: widget.primaryAccent.withOpacity(0.2),
                         child: ClipOval(
                           child: SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: _buildImage(widget.avatarUrl,
-                                fit: BoxFit.cover),
+                            width: 40,
+                            height: 40,
+                            child: _buildImage(widget.avatarUrl, fit: BoxFit.cover),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          widget.creatorName,
-                          style: GoogleFonts.poppins(
-                            color: primaryText,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14,
-                          ),
+                      const SizedBox(width: 12),
+                      Text(
+                        widget.creatorName,
+                        style: GoogleFonts.poppins(
+                          color: primaryText,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  if (!_dmUnlocked)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: widget.secondaryAccent.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: _stroke(isDark), width: 1),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.isAmharic
-                                ? 'á‹¨DM áŠ­áá‹« (áŠ áŠ•á‹µ áŒŠá‹œ á‰¥á‰»)'
-                                : 'DM Access (One-Time Fee)',
-                            style: GoogleFonts.poppins(
-                              color: secondaryText,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
+                ),
+                if (!_dmUnlocked)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(vertical: 24),
+                    decoration: BoxDecoration(
+                      color: widget.secondaryAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _stroke(isDark), width: 1),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.lock_outline, size: 40, color: widget.secondaryAccent),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.isAmharic
+                              ? 'የDM ክፍያ (አንድ ጊዜ ብቻ)'
+                              : 'DM Access (One-Time Fee)',
+                          style: GoogleFonts.poppins(
+                            color: secondaryText,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'ETB ${widget.dmRequestAmount}',
-                            style: GoogleFonts.robotoMono(
-                              color: primaryText,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'ETB ${widget.dmRequestAmount}',
+                          style: GoogleFonts.robotoMono(
+                            color: primaryText,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
                           ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 40,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() => _dmUnlocked = true);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                backgroundColor: widget.primaryAccent,
-                                foregroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: Text(
-                                widget.isAmharic
-                                    ? 'áŠ áŠ•á‹µ áŒŠá‹œ áŠ­áˆáˆ áŠ¥áŠ“ DM áŠ­áˆá‰µ'
-                                    : 'Pay Once & Unlock DM',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() => _dmUnlocked = true);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: widget.primaryAccent,
+                              foregroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
                               ),
                             ),
+                            child: Text(
+                              widget.isAmharic
+                                  ? 'አንድ ጊዜ ክፈል እና DM ክፈት'
+                                  : 'Pay Once & Unlock DM',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    )
-                  else ...[
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _dmHistory.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final item = _dmHistory[index];
-                        final bool isMe = item['isMe'] as bool? ?? false;
-                        return Row(
-                          mainAxisAlignment: isMe
-                              ? MainAxisAlignment.end
-                              : MainAxisAlignment.start,
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _dmHistory.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final item = _dmHistory[index];
+                      final bool isMe = item['isMe'] as bool? ?? false;
+                      return Align(
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                           children: [
                             if (!isMe)
-                              const SizedBox(
-                                width: 22,
-                                height: 22,
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
                                 child: CircleAvatar(
-                                  radius: 11,
-                                  backgroundColor: Colors.white12,
-                                  child: Icon(Icons.person,
-                                      size: 12, color: Colors.white70),
+                                  radius: 14,
+                                  backgroundImage: NetworkImage(widget.avatarUrl),
+                                  backgroundColor: Colors.transparent,
                                 ),
                               ),
-                            if (!isMe) const SizedBox(width: 6),
                             Flexible(
                               child: Container(
-                                padding:
-                                    const EdgeInsets.fromLTRB(12, 9, 12, 7),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 decoration: BoxDecoration(
                                   color: isMe
-                                      ? widget.primaryAccent
-                                      : (isDark
-                                          ? const Color(0xFF26262D)
-                                          : Colors.white),
+                                      ? const Color(0xFF3797F0) // Instagram Blue
+                                      : (isDark ? const Color(0xFF262626) : const Color(0xFFEFEFEF)),
                                   borderRadius: BorderRadius.only(
-                                    topLeft: const Radius.circular(16),
-                                    topRight: const Radius.circular(16),
-                                    bottomLeft: Radius.circular(isMe ? 16 : 4),
-                                    bottomRight: Radius.circular(isMe ? 4 : 16),
-                                  ),
-                                  border: Border.all(
-                                    color: isMe
-                                        ? widget.primaryAccent
-                                        : _stroke(isDark),
-                                    width: 1,
+                                    topLeft: const Radius.circular(20),
+                                    topRight: const Radius.circular(20),
+                                    bottomLeft: Radius.circular(isMe ? 20 : 4),
+                                    bottomRight: Radius.circular(isMe ? 4 : 20),
                                   ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item['text'] as String? ?? '',
-                                      style: GoogleFonts.poppins(
-                                        color:
-                                            isMe ? Colors.black : primaryText,
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.25,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      item['time'] as String? ?? '',
-                                      style: GoogleFonts.robotoMono(
-                                        color: isMe
-                                            ? Colors.black.withOpacity(0.65)
-                                            : secondaryText,
-                                        fontSize: 9.5,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  item['text'] as String? ?? '',
+                                  style: GoogleFonts.poppins(
+                                    color: isMe ? Colors.white : primaryText,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
-                        );
-                      },
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: isDark ? const Color(0xFF333333) : const Color(0xFFE0E0E0), width: 1),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF212127) : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: _stroke(isDark), width: 1),
-                      ),
-                      padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _dmComposerController,
-                              minLines: 1,
-                              maxLines: 3,
-                              style: GoogleFonts.poppins(
-                                color: primaryText,
-                                fontSize: 13,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: widget.isAmharic
-                                    ? 'áˆ˜áˆá‹•áŠ­á‰µ á‹­áƒá‰...'
-                                    : 'Message...',
-                                hintStyle: GoogleFonts.poppins(
-                                    color: secondaryText, fontSize: 12.5),
-                                border: InputBorder.none,
-                                isCollapsed: true,
-                              ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.emoji_emotions_outlined, color: secondaryText, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _dmComposerController,
+                            minLines: 1,
+                            maxLines: 4,
+                            style: GoogleFonts.poppins(
+                              color: primaryText,
+                              fontSize: 14,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: widget.isAmharic ? 'መልዕክት...' : 'Message...',
+                              hintStyle: GoogleFonts.poppins(color: secondaryText, fontSize: 14),
+                              border: InputBorder.none,
+                              isCollapsed: true,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          IconButton(
-                            onPressed: _sendComposerMessage,
-                            icon: Icon(Icons.send_rounded,
-                                color: widget.primaryAccent),
-                          ),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          onPressed: _sendComposerMessage,
+                          icon: const Icon(Icons.send, color: Color(0xFF3797F0)),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 24),
                 ],
-              ),
+              ],
             ),
           ),
         );

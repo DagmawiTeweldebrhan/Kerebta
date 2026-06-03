@@ -1,7 +1,6 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CreatorDashboardPage extends StatefulWidget {
   const CreatorDashboardPage({
@@ -29,27 +28,13 @@ class _CreatorDashboardPageState extends State<CreatorDashboardPage> {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final _StudioPalette palette = _StudioPalette(isDark: isDark);
     final _StudioStrings strings = _StudioStrings(widget.isAmharic);
+
     final List<Widget> tabs = <Widget>[
-      _OverviewTab(
-        key: const PageStorageKey<String>('studio-overview'),
-        palette: palette,
-        strings: strings,
-      ),
-      _ContentLibraryTab(
-        key: const PageStorageKey<String>('studio-content'),
-        palette: palette,
-        strings: strings,
-      ),
-      _PaidDmInboxTab(
-        key: const PageStorageKey<String>('studio-paid-dm'),
-        palette: palette,
-        strings: strings,
-      ),
-      _AudienceInsightsTab(
-        key: const PageStorageKey<String>('studio-audience'),
-        palette: palette,
-        strings: strings,
-      ),
+      _OverviewAnalyticsTab(palette: palette, strings: strings),
+      _MediaCatalogTab(palette: palette, strings: strings),
+      _MerchandiseTab(palette: palette, strings: strings),
+      _PaidDmInboxTab(palette: palette, strings: strings),
+      _PayoutSettlementsTab(palette: palette, strings: strings),
     ];
 
     return Scaffold(
@@ -61,13 +46,9 @@ class _CreatorDashboardPageState extends State<CreatorDashboardPage> {
             return ValueListenableBuilder<int>(
               valueListenable: _activeIndex,
               builder: (context, activeIndex, _) {
-                final Widget content = Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: IndexedStack(
-                    index: activeIndex,
-                    children: tabs,
-                  ),
+                final Widget content = IndexedStack(
+                  index: activeIndex,
+                  children: tabs,
                 );
 
                 if (useRail) {
@@ -104,7 +85,37 @@ class _CreatorDashboardPageState extends State<CreatorDashboardPage> {
   }
 }
 
+class _StudioPalette {
+  final bool isDark;
+  _StudioPalette({required this.isDark});
+
+  Color get canvas => isDark ? const Color(0xFF0B0B0E) : const Color(0xFFF8F9FA);
+  Color get card => isDark ? const Color(0xFF1A1A1E) : const Color(0xFFF1F3F5);
+  Color get green => const Color(0xFF00E676);
+  Color get purple => const Color(0xFFD500F9);
+  Color get amber => const Color(0xFFFFAB00);
+  Color get textPrimary => isDark ? Colors.white : Colors.black87;
+  Color get textSecondary => isDark ? Colors.white70 : Colors.black54;
+  Color get border => isDark ? const Color.fromRGBO(255, 255, 255, 0.06) : const Color.fromRGBO(0, 0, 0, 0.06);
+}
+
+class _StudioStrings {
+  final bool isAmharic;
+  _StudioStrings(this.isAmharic);
+
+  String get tabOverview => isAmharic ? 'አጠቃላይ' : 'Overview';
+  String get tabMedia => isAmharic ? 'ሚዲያ' : 'Media';
+  String get tabMerch => isAmharic ? 'ምርቶች' : 'Merch';
+  String get tabInbox => isAmharic ? 'መልዕክት' : 'Inbox';
+  String get tabPayouts => isAmharic ? 'ክፍያዎች' : 'Payouts';
+}
+
 class _StudioRail extends StatelessWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+  final int activeIndex;
+  final ValueChanged<int> onSelect;
+
   const _StudioRail({
     required this.palette,
     required this.strings,
@@ -112,58 +123,73 @@ class _StudioRail extends StatelessWidget {
     required this.onSelect,
   });
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      decoration: BoxDecoration(
+        color: palette.card,
+        border: Border(right: BorderSide(color: palette.border, width: 1)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 24),
+          _RailItem(icon: Icons.dashboard_outlined, activeIcon: Icons.dashboard, label: strings.tabOverview, isActive: activeIndex == 0, onTap: () => onSelect(0), palette: palette),
+          _RailItem(icon: Icons.video_library_outlined, activeIcon: Icons.video_library, label: strings.tabMedia, isActive: activeIndex == 1, onTap: () => onSelect(1), palette: palette),
+          _RailItem(icon: Icons.shopping_bag_outlined, activeIcon: Icons.shopping_bag, label: strings.tabMerch, isActive: activeIndex == 2, onTap: () => onSelect(2), palette: palette),
+          _RailItem(icon: Icons.message_outlined, activeIcon: Icons.message, label: strings.tabInbox, isActive: activeIndex == 3, onTap: () => onSelect(3), palette: palette),
+          _RailItem(icon: Icons.account_balance_wallet_outlined, activeIcon: Icons.account_balance_wallet, label: strings.tabPayouts, isActive: activeIndex == 4, onTap: () => onSelect(4), palette: palette),
+        ],
+      ),
+    );
+  }
+}
+
+class _RailItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
   final _StudioPalette palette;
-  final _StudioStrings strings;
-  final int activeIndex;
-  final ValueChanged<int> onSelect;
+
+  const _RailItem({required this.icon, required this.activeIcon, required this.label, required this.isActive, required this.onTap, required this.palette});
 
   @override
   Widget build(BuildContext context) {
-    final List<_NavItem> items = _navItems(strings);
-    return Container(
-      width: 78,
-      margin: const EdgeInsets.fromLTRB(12, 12, 0, 12),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.stroke, width: 1),
-      ),
-      child: NavigationRail(
-        selectedIndex: activeIndex,
-        onDestinationSelected: onSelect,
-        labelType: NavigationRailLabelType.none,
-        backgroundColor: Colors.transparent,
-        groupAlignment: -0.7,
-        indicatorColor: Colors.transparent,
-        selectedIconTheme: IconThemeData(color: palette.primaryAction),
-        unselectedIconTheme: IconThemeData(
-          color: palette.secondaryText.withValues(alpha: 0.7),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                Icon(isActive ? activeIcon : icon, color: isActive ? palette.textPrimary : palette.textSecondary, size: 28),
+                if (isActive)
+                  Container(
+                    width: 8, height: 8,
+                    decoration: BoxDecoration(color: palette.green, shape: BoxShape.circle),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: GoogleFonts.poppins(fontSize: 10, color: isActive ? palette.textPrimary : palette.textSecondary, fontWeight: isActive ? FontWeight.w600 : FontWeight.w400), maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
         ),
-        destinations: items
-            .asMap()
-            .entries
-            .map(
-              (entry) => NavigationRailDestination(
-                icon: _NavGlyph(
-                  icon: entry.value.icon,
-                  active: activeIndex == entry.key,
-                  palette: palette,
-                ),
-                selectedIcon: _NavGlyph(
-                  icon: entry.value.icon,
-                  active: true,
-                  palette: palette,
-                ),
-                label: Text(entry.value.label),
-              ),
-            )
-            .toList(),
       ),
     );
   }
 }
 
 class _StudioBottomNav extends StatelessWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+  final int activeIndex;
+  final ValueChanged<int> onSelect;
+
   const _StudioBottomNav({
     required this.palette,
     required this.strings,
@@ -171,350 +197,454 @@ class _StudioBottomNav extends StatelessWidget {
     required this.onSelect,
   });
 
-  final _StudioPalette palette;
-  final _StudioStrings strings;
-  final int activeIndex;
-  final ValueChanged<int> onSelect;
-
   @override
   Widget build(BuildContext context) {
-    final List<_NavItem> items = _navItems(strings);
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.stroke, width: 1),
+        color: palette.card,
+        border: Border(top: BorderSide(color: palette.border, width: 1)),
       ),
-      child: Row(
-        children: items.asMap().entries.map((entry) {
-          final int index = entry.key;
-          final _NavItem item = entry.value;
-          final bool active = activeIndex == index;
-          return Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => onSelect(index),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _NavGlyph(
-                      icon: item.icon,
-                      active: active,
-                      palette: palette,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      item.shortLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        color: active
-                            ? palette.primaryText
-                            : palette.secondaryText.withValues(alpha: 0.9),
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.15,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _NavGlyph extends StatelessWidget {
-  const _NavGlyph({
-    required this.icon,
-    required this.active,
-    required this.palette,
-  });
-
-  final IconData icon;
-  final bool active;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 21,
-            color: active
-                ? palette.primaryAction
-                : palette.secondaryText.withValues(alpha: 0.8),
-          ),
-          if (active)
-            const Positioned(
-              right: 2,
-              top: 4,
-              child: _NeonDot(),
-            ),
+      child: BottomNavigationBar(
+        currentIndex: activeIndex,
+        onTap: onSelect,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: palette.textPrimary,
+        unselectedItemColor: palette.textSecondary,
+        selectedLabelStyle: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.dashboard_outlined), activeIcon: const Icon(Icons.dashboard), label: strings.tabOverview),
+          BottomNavigationBarItem(icon: const Icon(Icons.video_library_outlined), activeIcon: const Icon(Icons.video_library), label: strings.tabMedia),
+          BottomNavigationBarItem(icon: const Icon(Icons.shopping_bag_outlined), activeIcon: const Icon(Icons.shopping_bag), label: strings.tabMerch),
+          BottomNavigationBarItem(icon: const Icon(Icons.message_outlined), activeIcon: const Icon(Icons.message), label: strings.tabInbox),
+          BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet_outlined), activeIcon: const Icon(Icons.account_balance_wallet), label: strings.tabPayouts),
         ],
       ),
     );
   }
 }
 
-class _NeonDot extends StatelessWidget {
-  const _NeonDot();
+// -----------------------------------------------------------------------------
+// TAB 1: OVERVIEW ANALYTICS
+// -----------------------------------------------------------------------------
+class _OverviewAnalyticsTab extends StatelessWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+
+  const _OverviewAnalyticsTab({required this.palette, required this.strings});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 6,
-      height: 6,
-      decoration: const BoxDecoration(
-        color: Color(0xFF00E676),
-        shape: BoxShape.circle,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Vitals Matrix
+        Container(
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: palette.border, width: 1),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Total Settleable Revenue', style: GoogleFonts.poppins(fontSize: 12, color: palette.textSecondary)),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text('ETB 142,850.00', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: palette.green.withAlpha(20), borderRadius: BorderRadius.circular(8)),
+                            child: Text('▲ +18.4% this week', style: GoogleFonts.poppins(fontSize: 10, color: palette.green, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(width: 1, height: 60, color: palette.border),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(strings.isAmharic ? 'ተከታዮች / ደጋፊዎች' : 'Followers / Supporters', style: GoogleFonts.poppins(fontSize: 10, color: palette.textSecondary)),
+                            const SizedBox(height: 8),
+                            Text('45.2K / 1.2K', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: palette.border),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_clock, color: palette.amber, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text('14 Actionable Inbound Paid DMs', style: GoogleFonts.poppins(fontSize: 12, color: palette.textSecondary)),
+                    ),
+                    Text('ETB 7,200 Locked', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: palette.amber)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Chart placeholder
+        Text('Revenue Trends', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+        const SizedBox(height: 12),
+        Container(
+          height: 180,
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: palette.border, width: 1),
+          ),
+          child: CustomPaint(
+            painter: _GridChartPainter(palette: palette),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Ledger
+        Text('Recent Transactions', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: palette.border, width: 1),
+          ),
+          child: Column(
+            children: [
+              _LedgerRow(id: '#ORD-991', item: 'VIP Ticket Pass', amount: 'ETB 1,500', status: 'Fulfilled', palette: palette),
+              Divider(height: 1, color: palette.border),
+              _LedgerRow(id: '#ORD-990', item: 'Digital Track 01', amount: 'ETB 50', status: 'Processing', palette: palette),
+              Divider(height: 1, color: palette.border),
+              _LedgerRow(id: '#ORD-989', item: 'Exclusive Hoodie', amount: 'ETB 2,400', status: 'Failed', palette: palette),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LedgerRow extends StatelessWidget {
+  final String id;
+  final String item;
+  final String amount;
+  final String status;
+  final _StudioPalette palette;
+
+  const _LedgerRow({required this.id, required this.item, required this.amount, required this.status, required this.palette});
+
+  @override
+  Widget build(BuildContext context) {
+    Color statusColor;
+    if (status == 'Fulfilled') statusColor = palette.green;
+    else if (status == 'Processing') statusColor = palette.amber;
+    else statusColor = Colors.redAccent;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(id, style: GoogleFonts.robotoMono(fontSize: 12, color: palette.textSecondary)),
+                Text(item, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: palette.textPrimary)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Text(amount, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withAlpha(20),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: statusColor.withAlpha(50), width: 1),
+            ),
+            child: Text(status, style: GoogleFonts.poppins(fontSize: 10, color: statusColor, fontWeight: FontWeight.w600)),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _OverviewTab extends StatefulWidget {
-  const _OverviewTab({
-    super.key,
-    required this.palette,
-    required this.strings,
-  });
-
+class _GridChartPainter extends CustomPainter {
   final _StudioPalette palette;
-  final _StudioStrings strings;
+  _GridChartPainter({required this.palette});
 
   @override
-  State<_OverviewTab> createState() => _OverviewTabState();
+  void paint(Canvas canvas, Size size) {
+    final paintGrid = Paint()..color = palette.border..strokeWidth = 1;
+    final double stepX = size.width / 6;
+    for (double i = 0; i <= size.width; i += stepX) {
+      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paintGrid);
+    }
+    final double stepY = size.height / 4;
+    for (double i = 0; i <= size.height; i += stepY) {
+      canvas.drawLine(Offset(0, i), Offset(size.width, i), paintGrid);
+    }
+
+    final paintLine = Paint()
+      ..color = palette.green
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+    
+    final path = Path();
+    path.moveTo(0, size.height * 0.8);
+    path.quadraticBezierTo(size.width * 0.2, size.height * 0.9, size.width * 0.4, size.height * 0.5);
+    path.quadraticBezierTo(size.width * 0.6, size.height * 0.1, size.width * 0.8, size.height * 0.4);
+    path.quadraticBezierTo(size.width * 0.9, size.height * 0.5, size.width, size.height * 0.2);
+    canvas.drawPath(path, paintLine);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _OverviewTabState extends State<_OverviewTab>
-    with AutomaticKeepAliveClientMixin<_OverviewTab> {
-  late final ScrollController _scrollController;
+// -----------------------------------------------------------------------------
+// TAB 2: MEDIA CATALOG
+// -----------------------------------------------------------------------------
+class _MediaCatalogTab extends StatefulWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+  const _MediaCatalogTab({required this.palette, required this.strings});
 
-  final List<_LedgerEntry> _ledger = <_LedgerEntry>[
-    _LedgerEntry(
-      id: 'TX-9042',
-      itemLabel: 'VIP Pass Ticket',
-      dateTime: '2026-05-26 08:42',
-      amountEtb: 1200,
-      status: _LedgerStatus.fulfilled,
-    ),
-    _LedgerEntry(
-      id: 'TX-9037',
-      itemLabel: 'Paid DM Escrow',
-      dateTime: '2026-05-26 07:18',
-      amountEtb: 1000,
-      status: _LedgerStatus.pending,
-    ),
-    _LedgerEntry(
-      id: 'TX-9026',
-      itemLabel: 'Audio Drop Bundle',
-      dateTime: '2026-05-25 19:14',
-      amountEtb: 8400,
-      status: _LedgerStatus.fulfilled,
-    ),
-    _LedgerEntry(
-      id: 'TX-9021',
-      itemLabel: 'Backstage Offer',
-      dateTime: '2026-05-25 15:02',
-      amountEtb: 450,
-      status: _LedgerStatus.failed,
-    ),
-    _LedgerEntry(
-      id: 'TX-9008',
-      itemLabel: 'Premium Support',
-      dateTime: '2026-05-25 10:11',
-      amountEtb: 3000,
-      status: _LedgerStatus.fulfilled,
-    ),
+  @override
+  State<_MediaCatalogTab> createState() => _MediaCatalogTabState();
+}
+
+class _MediaCatalogTabState extends State<_MediaCatalogTab> {
+  int _selectedFilter = 0;
+  
+  final List<Map<String, dynamic>> _videos = [
+    {
+      'title': 'Behind The Scenes Part 1',
+      'titleAmh': 'ከጀርባ ያሉ ትዕይንቶች ክፍል 1',
+      'description': 'Exclusive look at how we shot the music video in Addis Ababa.',
+      'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'duration': '10:42',
+      'views': '45K Views',
+      'earnings': 'ETB 24,150.00',
+      'isPublic': true,
+    },
+    {
+      'title': 'Addis Vibe Studio Session',
+      'titleAmh': 'የአዲስ ቫይብ ስቱዲዮ ዝግጅት',
+      'description': 'Studio recording session for our new single album.',
+      'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'duration': '08:15',
+      'views': '32K Views',
+      'earnings': 'ETB 18,200.00',
+      'isPublic': true,
+    },
+    {
+      'title': 'Traditional Fusion Dance Intro',
+      'titleAmh': 'ባህላዊ ውዝዋዜ መግቢያ',
+      'description': 'Behind-the-scenes choreography training sessions.',
+      'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'duration': '05:30',
+      'views': '12K Views',
+      'earnings': 'ETB 5,400.00',
+      'isPublic': false,
+    },
   ];
 
-  final List<double> _revenuePoints = <double>[
-    48,
-    56,
-    52,
-    61,
-    64,
-    70,
-    68,
-    72,
-    86,
-    82,
-    94,
-    101,
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch YouTube link: $urlString')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error launching link: $e')),
+      );
+    }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  void _showAddVideoSheet() {
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController descController = TextEditingController();
+    final TextEditingController urlController = TextEditingController();
+    bool isPublicVal = true;
 
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    final _StudioPalette p = widget.palette;
-    final _StudioStrings s = widget.strings;
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: _PageHeading(
-            title: s.overview,
-            subtitle: s.overviewSubtitle,
-            palette: p,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: _buildVitals(p, s),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: _StudioCard(
-              palette: p,
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    s.revenuePath,
-                    style: GoogleFonts.poppins(
-                      color: p.primaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateSheet) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: widget.palette.card,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: widget.palette.border, width: 1),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.strings.isAmharic ? 'አዲስ ቪዲዮ አክል' : 'Add New Video',
+                      style: GoogleFonts.poppins(
+                        color: widget.palette.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    s.revenuePathSub,
-                    style: GoogleFonts.poppins(
-                      color: p.secondaryText,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 220,
-                    width: double.infinity,
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        painter: _RevenueChartPainter(
-                          points: _revenuePoints,
-                          lineColor: p.primaryAction,
-                          gridColor: p.stroke,
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: titleController,
+                      style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                      decoration: InputDecoration(
+                        labelText: widget.strings.isAmharic ? 'ርዕስ' : 'Title',
+                        labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.border),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.purple),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 8),
-            child: Text(
-              s.transactionLedger,
-              style: GoogleFonts.poppins(
-                color: p.primaryText,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        SliverList.builder(
-          itemCount: _ledger.length,
-          itemBuilder: (context, index) {
-            final _LedgerEntry entry = _ledger[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _StudioCard(
-                palette: p,
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.id,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.robotoMono(
-                              color: p.primaryText,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          _ItemBadge(label: entry.itemLabel, palette: p),
-                          const SizedBox(height: 5),
-                          Text(
-                            entry.dateTime,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              color: p.secondaryText,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descController,
+                      style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: widget.strings.isAmharic ? 'መግለጫ' : 'Description',
+                        labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.border),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.purple),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            _formatEtb(entry.amountEtb),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.robotoMono(
-                              color: p.primaryText,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          _StatusChip(
-                            status: entry.status,
-                            palette: p,
-                            strings: s,
-                          ),
-                        ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: urlController,
+                      style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                      keyboardType: TextInputType.url,
+                      decoration: InputDecoration(
+                        labelText: widget.strings.isAmharic ? 'የዩቲዩብ ሊንክ' : 'YouTube Link',
+                        labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                        hintText: 'https://www.youtube.com/watch?...',
+                        hintStyle: GoogleFonts.poppins(color: widget.palette.textSecondary.withOpacity(0.5)),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.border),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: widget.palette.purple),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          widget.strings.isAmharic ? 'ለሁሉም የሚታይ (Public)' : 'Make Public',
+                          style: GoogleFonts.poppins(color: widget.palette.textPrimary, fontSize: 14),
+                        ),
+                        Switch(
+                          value: isPublicVal,
+                          activeColor: widget.palette.purple,
+                          onChanged: (val) {
+                            setStateSheet(() => isPublicVal = val);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: widget.palette.purple,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () {
+                          final title = titleController.text.trim();
+                          final desc = descController.text.trim();
+                          final url = urlController.text.trim();
+                          if (title.isEmpty || url.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(widget.strings.isAmharic ? 'እባክዎ ርዕስ እና የዩቲዩብ ሊንክ ያስገቡ' : 'Please enter title and YouTube link')),
+                            );
+                            return;
+                          }
+                          Navigator.pop(context);
+                          setState(() {
+                            _videos.insert(0, {
+                              'title': title,
+                              'titleAmh': title,
+                              'description': desc,
+                              'url': url,
+                              'duration': '03:45',
+                              'views': '0 Views',
+                              'earnings': 'ETB 0.00',
+                              'isPublic': isPublicVal,
+                            });
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(widget.strings.isAmharic ? 'ቪዲዮ በተሳካ ሁኔታ ተጭኗል' : 'Video uploaded successfully')),
+                          );
+                        },
+                        child: Text(
+                          widget.strings.isAmharic ? 'ቪዲዮ አክል' : 'Add Video',
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
                       ),
                     ),
                   ],
@@ -522,465 +652,184 @@ class _OverviewTabState extends State<_OverviewTab>
               ),
             );
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVitals(_StudioPalette p, _StudioStrings s) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double width = constraints.maxWidth;
-        final double cardWidth = width >= 980
-            ? (width - 16) / 3
-            : width >= 660
-                ? (width - 8) / 2
-                : width;
-        final List<Widget> cards = [
-          SizedBox(
-            width: cardWidth,
-            child: _MetricCard(
-              palette: p,
-              label: s.netVaultBalance,
-              value: _formatEtb(142850),
-              chipText: '▲ +18.4% ${s.thisWeek}',
-              chipColor: p.positive,
-            ),
-          ),
-          SizedBox(
-            width: cardWidth,
-            child: _MetricCard(
-              palette: p,
-              label: s.totalActiveBackers,
-              value: _formatCompact(4240),
-              chipText: s.liveCount,
-              chipColor: p.primaryAction,
-            ),
-          ),
-          SizedBox(
-            width: cardWidth,
-            child: _MetricCard(
-              palette: p,
-              label: s.dmEscrowVault,
-              value: '14 ${s.inboundPaidDm}',
-              chipText: '${_formatEtb(7200)} ${s.locked}',
-              chipColor: p.pending,
-            ),
-          ),
-        ];
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: cards,
         );
       },
     );
   }
-}
-
-class _ContentLibraryTab extends StatefulWidget {
-  const _ContentLibraryTab({
-    super.key,
-    required this.palette,
-    required this.strings,
-  });
-
-  final _StudioPalette palette;
-  final _StudioStrings strings;
-
-  @override
-  State<_ContentLibraryTab> createState() => _ContentLibraryTabState();
-}
-
-class _ContentLibraryTabState extends State<_ContentLibraryTab>
-    with AutomaticKeepAliveClientMixin<_ContentLibraryTab> {
-  late final ScrollController _scrollController;
-  _MediaFilter _filter = _MediaFilter.all;
-
-  final List<_MediaItem> _items = <_MediaItem>[
-    _MediaItem(
-      id: 'M-1001',
-      title: 'Exclusive Behind-the-Scenes Album Documentary',
-      visibility: _MediaVisibility.public,
-      uploadedAt: '2026-05-22 11:00',
-      duration: '18:42',
-      views: '14.2K',
-      engagement: '11.4%',
-      revenueEtb: 28400,
-      type: _MediaFilter.videos,
-      thumbnail: 'assets/images/logo.png',
-    ),
-    _MediaItem(
-      id: 'M-1002',
-      title: 'Acoustic Room Session: Limited Cut',
-      visibility: _MediaVisibility.public,
-      uploadedAt: '2026-05-20 08:40',
-      duration: '04:31',
-      views: '8.9K',
-      engagement: '9.6%',
-      revenueEtb: 12750,
-      type: _MediaFilter.audio,
-      thumbnail: 'assets/images/logo.png',
-    ),
-    _MediaItem(
-      id: 'M-1003',
-      title: 'Live Arena Ticket Batch #3',
-      visibility: _MediaVisibility.draft,
-      uploadedAt: '2026-05-18 16:21',
-      duration: 'N/A',
-      views: '2.4K',
-      engagement: '6.1%',
-      revenueEtb: 9400,
-      type: _MediaFilter.tickets,
-      thumbnail: 'assets/images/logo.png',
-    ),
-    _MediaItem(
-      id: 'M-1004',
-      title: 'Road Journal Episode 07',
-      visibility: _MediaVisibility.public,
-      uploadedAt: '2026-05-16 09:55',
-      duration: '12:09',
-      views: '19.5K',
-      engagement: '13.8%',
-      revenueEtb: 31200,
-      type: _MediaFilter.videos,
-      thumbnail: 'assets/images/logo.png',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
-  List<_MediaItem> get _filtered {
-    if (_filter == _MediaFilter.all) return _items;
-    return _items.where((item) => item.type == _filter).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final _StudioPalette p = widget.palette;
-    final _StudioStrings s = widget.strings;
-    final List<_MediaItem> filtered = _filtered;
+    final List<String> filters = widget.strings.isAmharic 
+      ? ['ሁሉም', 'ሙሉ ቪዲዮዎች', 'ታሪኮች', 'ሙዚቃ']
+      : ['All', 'Full Videos', 'Shorts', 'Audio Tracks'];
 
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: _PageHeading(
-            title: s.contentLibrary,
-            subtitle: s.contentSubtitle,
-            palette: p,
-          ),
-        ),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _PinnedHeaderDelegate(
-            minHeight: 56,
-            maxHeight: 56,
-            child: Container(
-              color: p.canvas,
-              alignment: Alignment.centerLeft,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _MediaFilter.values.map((filter) {
-                    final bool active = _filter == filter;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: InkWell(
-                        onTap: () => setState(() => _filter = filter),
-                        borderRadius: BorderRadius.circular(999),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: active ? p.primaryAction : p.surface,
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: active ? p.primaryAction : p.stroke,
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            s.mediaFilterLabel(filter),
-                            style: GoogleFonts.poppins(
-                              color: active ? Colors.black : p.primaryText,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: widget.palette.purple,
+        onPressed: _showAddVideoSheet,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: Column(
+        children: [
+          // Filter Strip
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemCount: filters.length,
+              itemBuilder: (context, index) {
+                final bool isSelected = _selectedFilter == index;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedFilter = index),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? widget.palette.purple : widget.palette.card,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isSelected ? widget.palette.purple : widget.palette.border, width: 1),
+                    ),
+                    child: Text(
+                      filters[index],
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : widget.palette.textSecondary,
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-        if (filtered.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: _EmptyPanel(
-                palette: p,
-                title: s.noItems,
-                subtitle: s.noItemsSubtitle,
-              ),
-            ),
-          )
-        else
-          SliverList.builder(
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final _MediaItem item = filtered[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _StudioCard(
-                  palette: p,
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final double rowWidth = constraints.maxWidth;
-                      final double thumbWidth =
-                          math.max(100, math.min(156, rowWidth * 0.32));
-                      final double metricsWidth =
-                          math.max(96, math.min(150, rowWidth * 0.28));
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: thumbWidth,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    _StudioImage(source: item.thumbnail),
-                                    Positioned(
-                                      right: 6,
-                                      bottom: 6,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.75,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: p.stroke,
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          item.duration,
-                                          style: GoogleFonts.robotoMono(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    color: p.primaryText,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.28,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 7,
-                                      height: 7,
-                                      decoration: BoxDecoration(
-                                        color: item.visibility ==
-                                                _MediaVisibility.public
-                                            ? p.positive
-                                            : p.secondaryText,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        item.visibility ==
-                                                _MediaVisibility.public
-                                            ? s.publicLabel
-                                            : s.draftLabel,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(
-                                          color: p.secondaryText,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  item.uploadedAt,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.robotoMono(
-                                    color: p.secondaryText,
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          SizedBox(
-                            width: metricsWidth,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _MiniMetric(
-                                  label: s.viewsShort,
-                                  value: item.views,
-                                  palette: p,
-                                ),
-                                _MiniMetric(
-                                  label: s.likesShort,
-                                  value: item.engagement,
-                                  palette: p,
-                                ),
-                                _MiniMetric(
-                                  label: 'ETB',
-                                  value: _formatCompact(item.revenueEtb),
-                                  palette: p,
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: s.manageItem,
-                            onPressed: () => _showMediaActions(item, p, s),
-                            icon: Icon(
-                              Icons.more_vert_rounded,
-                              color: p.secondaryText,
-                              size: 18,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-      ],
+          Expanded(
+            child: _selectedFilter == 2 
+              ? _buildShortsGrid() 
+              : _buildLongFormList(),
+          ),
+        ],
+      ),
     );
   }
 
-  void _showMediaActions(
-    _MediaItem item,
-    _StudioPalette p,
-    _StudioStrings s,
-  ) {
-    if (!mounted) return;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return Container(
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 18),
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-          decoration: BoxDecoration(
-            color: p.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: p.stroke, width: 1),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  color: p.primaryText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+  Widget _buildLongFormList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _videos.length,
+      itemBuilder: (context, index) {
+        final video = _videos[index];
+        return GestureDetector(
+          onTap: () => _launchURL(video['url'] as String),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: widget.palette.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: widget.palette.border, width: 1),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 120,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withAlpha(50),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.bottomRight,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
+                    child: Text(video['duration'] as String, style: GoogleFonts.robotoMono(fontSize: 10, color: Colors.white)),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              _ActionRow(
-                palette: p,
-                icon: Icons.stacked_bar_chart_outlined,
-                label: s.changeMonetization,
-              ),
-              _ActionRow(
-                palette: p,
-                icon: Icons.price_change_outlined,
-                label: s.adjustPricing,
-              ),
-              _ActionRow(
-                palette: p,
-                icon: Icons.visibility_outlined,
-                label: s.changeVisibility,
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(sheetContext).pop(),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: p.stroke, width: 1),
-                    foregroundColor: p.secondaryText,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.strings.isAmharic ? video['titleAmh'] as String : video['title'] as String, 
+                        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: widget.palette.textPrimary), 
+                        maxLines: 2, 
+                        overflow: TextOverflow.ellipsis
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8, 
+                            height: 8, 
+                            decoration: BoxDecoration(
+                              color: (video['isPublic'] as bool? ?? true) ? widget.palette.green : widget.palette.amber, 
+                              shape: BoxShape.circle
+                            )
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            (video['isPublic'] as bool? ?? true) 
+                              ? (widget.strings.isAmharic ? 'የህዝብ (Public)' : 'Public')
+                              : (widget.strings.isAmharic ? 'የግል (Private)' : 'Private'), 
+                            style: GoogleFonts.poppins(fontSize: 10, color: widget.palette.textSecondary)
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(video['views'] as String, style: GoogleFonts.poppins(fontSize: 12, color: widget.palette.textSecondary)),
+                    Text(video['earnings'] as String, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: widget.palette.green)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShortsGrid() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 9 / 16,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.withAlpha(50),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                bottom: 8, left: 8, right: 8,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('85K Views', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Row(
+                      children: [
+                        Icon(Icons.monetization_on, size: 12, color: widget.palette.green),
+                        const SizedBox(width: 4),
+                        Expanded(child: Text('Monetized', style: GoogleFonts.poppins(fontSize: 10, color: widget.palette.green), overflow: TextOverflow.ellipsis)),
+                      ],
                     ),
-                  ),
-                  child: Text(
-                    s.close,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -991,325 +840,179 @@ class _ContentLibraryTabState extends State<_ContentLibraryTab>
   }
 }
 
-class _PaidDmInboxTab extends StatefulWidget {
-  const _PaidDmInboxTab({
-    super.key,
-    required this.palette,
-    required this.strings,
-  });
-
+// -----------------------------------------------------------------------------
+// TAB 3: MERCHANDISE
+// -----------------------------------------------------------------------------
+class _MerchandiseTab extends StatefulWidget {
   final _StudioPalette palette;
   final _StudioStrings strings;
+  const _MerchandiseTab({required this.palette, required this.strings});
 
   @override
-  State<_PaidDmInboxTab> createState() => _PaidDmInboxTabState();
+  State<_MerchandiseTab> createState() => _MerchandiseTabState();
 }
 
-class _PaidDmInboxTabState extends State<_PaidDmInboxTab>
-    with AutomaticKeepAliveClientMixin<_PaidDmInboxTab> {
-  late final ScrollController _scrollController;
-  late final TextEditingController _composerController;
-  _DmFilter _filter = _DmFilter.highestValue;
-  String? _selectedThreadId;
-
-  final List<_PaidDmThread> _threads = <_PaidDmThread>[
-    _PaidDmThread(
-      id: 'DM-7001',
-      fanName: 'selam.music',
-      timeLabel: '09:24',
-      preview: 'Need a quick personalized voice note for my sister birthday.',
-      tier: _TierLevel.platinum,
-      amountEtb: 1000,
-      state: _DmState.unanswered,
-      unlockFeeEtb: 1000,
-      unlocked: false,
-      messages: <_ThreadMessage>[
-        _ThreadMessage(
-          fromCreator: false,
-          text: 'Need a quick personalized voice note for my sister birthday.',
-          timeLabel: '09:24',
-        ),
-      ],
-    ),
-    _PaidDmThread(
-      id: 'DM-7002',
-      fanName: 'addis.live',
-      timeLabel: '08:11',
-      preview: 'I sent ticket proof, can you confirm VIP meet slot?',
-      tier: _TierLevel.gold,
-      amountEtb: 750,
-      state: _DmState.unanswered,
-      unlockFeeEtb: 750,
-      unlocked: false,
-      messages: <_ThreadMessage>[
-        _ThreadMessage(
-          fromCreator: false,
-          text: 'I sent ticket proof, can you confirm VIP meet slot?',
-          timeLabel: '08:11',
-        ),
-      ],
-    ),
-    _PaidDmThread(
-      id: 'DM-6990',
-      fanName: 'hana.sound',
-      timeLabel: 'Yesterday',
-      preview: 'Thank you for the reply. Payment completed.',
-      tier: _TierLevel.silver,
-      amountEtb: 400,
-      state: _DmState.completed,
-      unlockFeeEtb: 400,
-      unlocked: true,
-      messages: <_ThreadMessage>[
-        _ThreadMessage(
-          fromCreator: false,
-          text: 'Can I receive the signed poster this week?',
-          timeLabel: 'Yesterday',
-        ),
-        _ThreadMessage(
-          fromCreator: true,
-          text: 'Yes, confirmed. It will ship this Friday.',
-          timeLabel: 'Yesterday',
-        ),
-      ],
-    ),
+class _MerchandiseTabState extends State<_MerchandiseTab> {
+  final List<Map<String, dynamic>> _merchItems = [
+    {
+      'name': 'Streetwear Hoodie 1',
+      'nameAmh': 'የጎዳና ላይ ሁዲ 1',
+      'price': 'ETB 2,500.00',
+      'stock': 'Only 5 Left',
+      'stockAmh': '5 ብቻ ቀሪ',
+    },
+    {
+      'name': 'Streetwear Hoodie 2',
+      'nameAmh': 'የጎዳና ላይ ሁዲ 2',
+      'price': 'ETB 2,500.00',
+      'stock': 'Only 5 Left',
+      'stockAmh': '5 ብቻ ቀሪ',
+    },
+    {
+      'name': 'Kerebta Classic Cap',
+      'nameAmh': 'ክላሲክ ቆብ',
+      'price': 'ETB 850.00',
+      'stock': 'In Stock',
+      'stockAmh': 'በክምችት ላይ',
+    },
+    {
+      'name': 'Limited Signature Mug',
+      'nameAmh': 'የፊርማ ጽዋ',
+      'price': 'ETB 600.00',
+      'stock': 'Only 2 Left',
+      'stockAmh': '2 ብቻ ቀሪ',
+    },
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _composerController = TextEditingController();
-    _selectedThreadId = _threads.first.id;
-  }
+  void _showAddMerchSheet() {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController priceController = TextEditingController();
+    final TextEditingController stockController = TextEditingController();
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _composerController.dispose();
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
-  _PaidDmThread? get _selectedThread {
-    if (_selectedThreadId == null) return null;
-    for (final _PaidDmThread thread in _threads) {
-      if (thread.id == _selectedThreadId) return thread;
-    }
-    return null;
-  }
-
-  List<_PaidDmThread> get _visibleThreads {
-    final List<_PaidDmThread> list = _threads.where((thread) {
-      switch (_filter) {
-        case _DmFilter.highestValue:
-          return true;
-        case _DmFilter.unanswered:
-          return thread.state == _DmState.unanswered;
-        case _DmFilter.completed:
-          return thread.state == _DmState.completed;
-      }
-    }).toList();
-    list.sort((a, b) {
-      if (_filter == _DmFilter.highestValue) {
-        return b.amountEtb.compareTo(a.amountEtb);
-      }
-      if (a.state == _DmState.unanswered && b.state != _DmState.unanswered) {
-        return -1;
-      }
-      if (a.state != _DmState.unanswered && b.state == _DmState.unanswered) {
-        return 1;
-      }
-      return b.amountEtb.compareTo(a.amountEtb);
-    });
-    return list;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    final _StudioPalette p = widget.palette;
-    final _StudioStrings s = widget.strings;
-    final List<_PaidDmThread> visible = _visibleThreads;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool split = constraints.maxWidth >= 980;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _PageHeading(
-              title: s.paidDmInbox,
-              subtitle: s.paidDmSubtitle,
-              palette: p,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: widget.palette.card,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: widget.palette.border, width: 1),
             ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _DmFilter.values.map((filter) {
-                  final bool active = _filter == filter;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      onTap: () => setState(() => _filter = filter),
-                      borderRadius: BorderRadius.circular(999),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 160),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: active ? p.primaryAction : p.surface,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: active ? p.primaryAction : p.stroke,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          s.dmFilterLabel(filter),
-                          style: GoogleFonts.poppins(
-                            color: active ? Colors.black : p.primaryText,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: split
-                  ? Row(
-                      children: [
-                        Expanded(
-                          flex: 11,
-                          child: _buildThreadList(visible, p, s),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 13,
-                          child: _buildThreadDetail(_selectedThread, p, s),
-                        ),
-                      ],
-                    )
-                  : _buildThreadList(visible, p, s),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildThreadList(
-    List<_PaidDmThread> visible,
-    _StudioPalette p,
-    _StudioStrings s,
-  ) {
-    if (visible.isEmpty) {
-      return _EmptyPanel(
-        palette: p,
-        title: s.noMessages,
-        subtitle: s.noMessagesSub,
-      );
-    }
-    return ListView.separated(
-      controller: _scrollController,
-      itemCount: visible.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final _PaidDmThread thread = visible[index];
-        final bool selected = _selectedThreadId == thread.id;
-        return InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            if (MediaQuery.sizeOf(context).width >= 980) {
-              setState(() => _selectedThreadId = thread.id);
-            } else {
-              _openDetailSheet(thread, p, s);
-            }
-          },
-          child: _StudioCard(
-            palette: p,
-            background:
-                selected ? p.surfaceAlt.withValues(alpha: 0.9) : p.surfaceAlt,
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _TierRingAvatar(tier: thread.tier, palette: p),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              thread.fanName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                color: p.primaryText,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            thread.timeLabel,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.robotoMono(
-                              color: p.secondaryText,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        thread.preview,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: p.secondaryText,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                          height: 1.25,
-                        ),
-                      ),
-                    ],
+                Text(
+                  widget.strings.isAmharic ? 'አዲስ ምርት አክል' : 'Add New Merchandise',
+                  style: GoogleFonts.poppins(
+                    color: widget.palette.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: p.primaryAction.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: p.primaryAction.withValues(alpha: 0.45),
-                      width: 1,
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameController,
+                  style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                  decoration: InputDecoration(
+                    labelText: widget.strings.isAmharic ? 'የምርት ስም' : 'Item Name',
+                    labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.border),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.purple),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
-                    _formatEtb(thread.amountEtb),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.robotoMono(
-                      color: p.primaryText,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: priceController,
+                  style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: widget.strings.isAmharic ? 'ዋጋ (ETB)' : 'Price (ETB)',
+                    labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                    hintText: 'e.g. 1500',
+                    hintStyle: GoogleFonts.poppins(color: widget.palette.textSecondary.withOpacity(0.5)),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.border),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.purple),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: stockController,
+                  style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                  decoration: InputDecoration(
+                    labelText: widget.strings.isAmharic ? 'ክምችት / መጠን' : 'Stock Quantity',
+                    labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                    hintText: 'e.g. 10 items left, In Stock',
+                    hintStyle: GoogleFonts.poppins(color: widget.palette.textSecondary.withOpacity(0.5)),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.border),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: widget.palette.purple),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: widget.palette.purple,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () {
+                      final name = nameController.text.trim();
+                      final price = priceController.text.trim();
+                      final stock = stockController.text.trim();
+                      if (name.isEmpty || price.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(widget.strings.isAmharic ? 'እባክዎ የምርት ስም እና ዋጋ ያስገቡ' : 'Please enter item name and price')),
+                        );
+                        return;
+                      }
+                      Navigator.pop(context);
+                      setState(() {
+                        _merchItems.insert(0, {
+                          'name': name,
+                          'nameAmh': name,
+                          'price': 'ETB $price.00',
+                          'stock': stock.isEmpty ? 'In Stock' : stock,
+                          'stockAmh': stock.isEmpty ? 'በክምችት ላይ' : stock,
+                        });
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(widget.strings.isAmharic ? 'ምርት በተሳካ ሁኔታ ታክሏል' : 'Merchandise added successfully')),
+                      );
+                    },
+                    child: Text(
+                      widget.strings.isAmharic ? 'ምርት አክል' : 'Add Item',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
                 ),
@@ -1321,315 +1024,796 @@ class _PaidDmInboxTabState extends State<_PaidDmInboxTab>
     );
   }
 
-  Widget _buildThreadDetail(
-    _PaidDmThread? thread,
-    _StudioPalette p,
-    _StudioStrings s,
-  ) {
-    if (thread == null) {
-      return _EmptyPanel(
-        palette: p,
-        title: s.selectDmThread,
-        subtitle: s.selectDmThreadSub,
-      );
-    }
-    return _StudioCard(
-      palette: p,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _TierRingAvatar(tier: thread.tier, palette: p),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  thread.fanName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    color: p.primaryText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              _StatusChip(
-                status: thread.state == _DmState.completed
-                    ? _LedgerStatus.fulfilled
-                    : _LedgerStatus.pending,
-                palette: p,
-                strings: s,
-              ),
-            ],
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Inventory', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+            IconButton(
+              icon: Icon(Icons.add_circle, color: widget.palette.purple),
+              onPressed: _showAddMerchSheet,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
-          const SizedBox(height: 10),
-          if (!thread.unlocked)
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(10),
+          itemCount: _merchItems.length,
+          itemBuilder: (context, index) {
+            final item = _merchItems[index];
+            return Container(
               decoration: BoxDecoration(
-                color: p.pending.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: p.stroke, width: 1),
+                color: widget.palette.card,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: widget.palette.border, width: 1),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    s.oneTimeDmFee,
-                    style: GoogleFonts.poppins(
-                      color: p.primaryText,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withAlpha(30),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(Icons.shopping_bag, size: 40, color: widget.palette.textSecondary),
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    '${_formatEtb(thread.unlockFeeEtb)} · ${s.payOnceOnly}',
-                    style: GoogleFonts.robotoMono(
-                      color: p.secondaryText,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          thread.unlocked = true;
-                          thread.messages.add(
-                            _ThreadMessage(
-                              fromCreator: false,
-                              text: s.unlockConfirmed,
-                              timeLabel: _timeLabelNow(),
-                            ),
-                          );
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: p.primaryAction,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.strings.isAmharic ? item['nameAmh'] as String : item['name'] as String, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: widget.palette.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 4),
+                        Text(item['price'] as String, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: widget.palette.purple)),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: widget.palette.amber.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                          child: Text(widget.strings.isAmharic ? item['stockAmh'] as String : item['stock'] as String, style: GoogleFonts.poppins(fontSize: 10, color: widget.palette.amber, fontWeight: FontWeight.bold)),
                         ),
-                      ),
-                      child: Text(
-                        s.unlockThread,
-                        style: GoogleFonts.poppins(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: p.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: p.stroke, width: 1),
-              ),
-              child: ListView.separated(
-                itemCount: thread.messages.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 7),
-                itemBuilder: (context, index) {
-                  final _ThreadMessage message = thread.messages[index];
-                  return Row(
-                    mainAxisAlignment: message.fromCreator
-                        ? MainAxisAlignment.end
-                        : MainAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 7),
-                          decoration: BoxDecoration(
-                            color: message.fromCreator
-                                ? p.primaryAction
-                                : p.surfaceAlt,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: message.fromCreator
-                                  ? p.primaryAction
-                                  : p.stroke,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                message.text,
-                                style: GoogleFonts.poppins(
-                                  color: message.fromCreator
-                                      ? Colors.black
-                                      : p.primaryText,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.25,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                message.timeLabel,
-                                style: GoogleFonts.robotoMono(
-                                  color: message.fromCreator
-                                      ? Colors.black.withValues(alpha: 0.65)
-                                      : p.secondaryText,
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        Text('Fulfillment Pipeline', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
+          ),
+          child: ListTile(
+            leading: Icon(Icons.local_shipping, color: widget.palette.textSecondary),
+            title: Text('#ORD-991 - Abebe K.', style: GoogleFonts.poppins(fontSize: 14, color: widget.palette.textPrimary)),
+            subtitle: Text('Pending Shipment', style: GoogleFonts.poppins(fontSize: 12, color: widget.palette.amber)),
+            trailing: Icon(Icons.chevron_right, color: widget.palette.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// TAB 4: PAID DM INBOX
+// -----------------------------------------------------------------------------
+class _PaidDmInboxTab extends StatefulWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+  const _PaidDmInboxTab({required this.palette, required this.strings});
+
+  @override
+  State<_PaidDmInboxTab> createState() => _PaidDmInboxTabState();
+}
+
+class _PaidDmInboxTabState extends State<_PaidDmInboxTab> {
+  int? _selectedChatIndex;
+  double _minDmFee = 500.00;
+  final TextEditingController _dmReplyController = TextEditingController();
+
+  final List<Map<String, dynamic>> _chats = [
+    {
+      'user': 'Alex T.',
+      'amount': 'ETB 1,000.00',
+      'tier': const Color(0xFFFFAB00), // Amber
+      'messages': [
+        {'isMe': false, 'text': 'Hey! Love your new video, can I ask you a question about the guitar tutorial?', 'time': '10:30 AM'},
+        {'isMe': true, 'text': 'Hey Alex! Thanks for the support. Sure, ask away!', 'time': '10:32 AM'},
+        {'isMe': false, 'text': 'What settings did you use for the reverb on the solo track?', 'time': '10:35 AM'},
+      ],
+    },
+    {
+      'user': 'Betty M.',
+      'amount': 'ETB 500.00',
+      'tier': Colors.grey,
+      'messages': [
+        {'isMe': false, 'text': 'Requesting a quick shoutout for my friend. His name is Dawit, it is his birthday tomorrow!', 'time': 'Yesterday'},
+      ],
+    },
+  ];
+
+  void _showEditGateDialog() {
+    final TextEditingController feeController = TextEditingController(text: _minDmFee.toStringAsFixed(0));
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: widget.palette.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            widget.strings.isAmharic ? 'የዲኤም መግቢያ ክፍያ ያስተካክሉ' : 'Edit Minimum DM Fee',
+            style: GoogleFonts.poppins(color: widget.palette.textPrimary, fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: feeController,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+            decoration: InputDecoration(
+              suffixText: 'ETB',
+              suffixStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: widget.palette.border)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: widget.palette.purple)),
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(widget.strings.isAmharic ? 'አትርሳ' : 'Cancel', style: GoogleFonts.poppins(color: widget.palette.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () {
+                final fee = double.tryParse(feeController.text.trim());
+                if (fee != null) {
+                  setState(() => _minDmFee = fee);
+                }
+                Navigator.pop(context);
+              },
+              child: Text(widget.strings.isAmharic ? 'አስቀምጥ' : 'Save', style: GoogleFonts.poppins(color: widget.palette.purple, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _sendMessage() {
+    final text = _dmReplyController.text.trim();
+    if (text.isEmpty || _selectedChatIndex == null) return;
+
+    final String time = TimeOfDay.now().format(context);
+    setState(() {
+      _chats[_selectedChatIndex!]['messages'].add({
+        'isMe': true,
+        'text': text,
+        'time': time,
+      });
+    });
+    _dmReplyController.clear();
+  }
+
+  @override
+  void dispose() {
+    _dmReplyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_selectedChatIndex != null) {
+      return _buildChatDetailView();
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Gate Control
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
+          ),
+          child: Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: p.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: p.stroke, width: 1),
-                  ),
-                  child: TextField(
-                    controller: _composerController,
-                    minLines: 1,
-                    maxLines: 3,
-                    style: GoogleFonts.poppins(
-                      color: p.primaryText,
-                      fontSize: 12.5,
-                    ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: s.replyHint,
-                      hintStyle: GoogleFonts.poppins(
-                        color: p.secondaryText,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Minimum DM Fee', style: GoogleFonts.poppins(fontSize: 12, color: widget.palette.textSecondary)),
+                    Text('ETB ${_minDmFee.toStringAsFixed(2)}', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 42,
-                height: 42,
-                child: ElevatedButton(
-                  onPressed:
-                      thread.unlocked ? () => _sendReply(thread, p, s) : null,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: p.primaryAction,
-                    foregroundColor: Colors.black,
-                    disabledBackgroundColor: p.stroke,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              ElevatedButton(
+                onPressed: _showEditGateDialog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: widget.palette.purple,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text('Edit Gate', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Filter
+        Row(
+          children: [
+            _DmFilterChip(label: widget.strings.isAmharic ? 'ከፍተኛ ክፍያ' : 'Highest Value', isActive: true, palette: widget.palette),
+            const SizedBox(width: 8),
+            _DmFilterChip(label: widget.strings.isAmharic ? 'ያልተመለሱ' : 'Unanswered', isActive: false, palette: widget.palette),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Messages
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _chats.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final chat = _chats[index];
+            final latestMsg = (chat['messages'] as List).last;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedChatIndex = index;
+                });
+              },
+              child: _PaidDmRow(
+                user: chat['user'] as String,
+                message: latestMsg['text'] as String,
+                amount: chat['amount'] as String,
+                tier: chat['tier'] as Color,
+                palette: widget.palette,
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChatDetailView() {
+    final chat = _chats[_selectedChatIndex!];
+    final messages = chat['messages'] as List;
+
+    return Column(
+      children: [
+        // Chat Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            border: Border(bottom: BorderSide(color: widget.palette.border)),
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back, color: widget.palette.textPrimary),
+                onPressed: () => setState(() => _selectedChatIndex = null),
+              ),
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: widget.palette.purple.withAlpha(40),
+                child: Text(
+                  (chat['user'] as String).substring(0, 1),
+                  style: GoogleFonts.poppins(color: widget.palette.purple, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      chat['user'] as String,
+                      style: GoogleFonts.poppins(color: widget.palette.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: const Icon(Icons.send_rounded, size: 18),
+                    Text(
+                      widget.strings.isAmharic ? 'የሚከፈልበት ዲኤም' : 'Paid DM',
+                      style: GoogleFonts.poppins(color: widget.palette.textSecondary, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: widget.palette.purple.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  chat['amount'] as String,
+                  style: GoogleFonts.robotoMono(color: widget.palette.purple, fontWeight: FontWeight.bold, fontSize: 11),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  thread.state = _DmState.completed;
-                });
-                ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                  SnackBar(content: Text(s.payoutApproved)),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: p.positive,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+        ),
+        // Messages list
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              final msg = messages[index];
+              final bool isMe = msg['isMe'] as bool;
+              return Align(
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isMe 
+                        ? widget.palette.purple 
+                        : widget.palette.card,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isMe ? 16 : 4),
+                      bottomRight: Radius.circular(isMe ? 4 : 16),
+                    ),
+                    border: isMe ? null : Border.all(color: widget.palette.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        msg['text'] as String,
+                        style: GoogleFonts.poppins(
+                          color: isMe ? Colors.white : widget.palette.textPrimary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        msg['time'] as String,
+                        style: GoogleFonts.poppins(
+                          color: isMe ? Colors.white70 : widget.palette.textSecondary,
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        // Composer Input Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            border: Border(top: BorderSide(color: widget.palette.border)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _dmReplyController,
+                  style: GoogleFonts.poppins(color: widget.palette.textPrimary, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: widget.strings.isAmharic ? 'መልስ ይጻፉ...' : 'Reply to fan...',
+                    hintStyle: GoogleFonts.poppins(color: widget.palette.textSecondary.withOpacity(0.6)),
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (_) => _sendMessage(),
                 ),
               ),
-              child: Text(
-                s.approveCollect,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.5,
-                ),
+              IconButton(
+                icon: Icon(Icons.send, color: widget.palette.purple),
+                onPressed: _sendMessage,
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DmFilterChip extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final _StudioPalette palette;
+  const _DmFilterChip({required this.label, required this.isActive, required this.palette});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isActive ? palette.purple.withAlpha(30) : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isActive ? palette.purple : palette.border, width: 1),
+      ),
+      child: Text(label, style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: isActive ? palette.purple : palette.textSecondary)),
+    );
+  }
+}
+
+class _PaidDmRow extends StatelessWidget {
+  final String user;
+  final String message;
+  final String amount;
+  final Color tier;
+  final _StudioPalette palette;
+
+  const _PaidDmRow({required this.user, required this.message, required this.amount, required this.tier, required this.palette});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.border, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: tier, width: 2),
             ),
+            child: CircleAvatar(radius: 20, backgroundColor: Colors.grey.withAlpha(50), child: const Icon(Icons.person, color: Colors.white)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+                Text(message, style: GoogleFonts.poppins(fontSize: 12, color: palette.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: palette.purple.withAlpha(30),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(amount, style: GoogleFonts.robotoMono(fontSize: 12, fontWeight: FontWeight.bold, color: palette.purple)),
           ),
         ],
       ),
     );
   }
+}
 
-  void _sendReply(_PaidDmThread thread, _StudioPalette p, _StudioStrings s) {
-    final String text = _composerController.text.trim();
-    if (text.isEmpty) return;
-    setState(() {
-      thread.messages.add(
-        _ThreadMessage(
-          fromCreator: true,
-          text: text,
-          timeLabel: _timeLabelNow(),
-        ),
-      );
-      thread.preview = text;
-      thread.timeLabel = _timeLabelNow();
-      if (thread.state != _DmState.completed) {
-        thread.state = _DmState.unanswered;
-      }
-    });
-    _composerController.clear();
-  }
+// -----------------------------------------------------------------------------
+// TAB 5: PAYOUTS & SETTLEMENTS
+// -----------------------------------------------------------------------------
+class _PayoutSettlementsTab extends StatefulWidget {
+  final _StudioPalette palette;
+  final _StudioStrings strings;
+  const _PayoutSettlementsTab({required this.palette, required this.strings});
 
-  void _openDetailSheet(
-      _PaidDmThread thread, _StudioPalette p, _StudioStrings s) {
-    if (!mounted) return;
-    showModalBottomSheet<void>(
+  @override
+  State<_PayoutSettlementsTab> createState() => _PayoutSettlementsTabState();
+}
+
+class _PayoutSettlementsTabState extends State<_PayoutSettlementsTab> {
+  String _cbeAccount = '**** **** 1234';
+  String _cbeHolder = 'Commercial Bank of Ethiopia (CBE)';
+  bool _cbeVerified = true;
+
+  String _telebirrAccount = '+251 911 *** ***';
+  bool _telebirrVerified = false;
+
+  void _showEditAccountSheet(bool isCbe) {
+    final TextEditingController field1Controller = TextEditingController(
+      text: isCbe ? '' : _telebirrAccount.replaceAll('*** ***', '').replaceAll('+251 911', '').trim(),
+    );
+    final TextEditingController holderController = TextEditingController(
+      text: isCbe ? '' : '',
+    );
+    
+    int sheetStep = 0;
+    final List<TextEditingController> otpControllers = List.generate(6, (_) => TextEditingController());
+    final List<FocusNode> otpFocusNodes = List.generate(6, (_) => FocusNode());
+    bool isVerifying = false;
+    bool hasOtpError = false;
+
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          minChildSize: 0.6,
-          maxChildSize: 0.95,
-          builder: (context, controller) {
-            return Container(
-              margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-              decoration: BoxDecoration(
-                color: p.canvas,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                border: Border.all(color: p.stroke, width: 1),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateSheet) {
+            if (sheetStep == 0) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: widget.palette.card,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: widget.palette.border, width: 1),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isCbe 
+                          ? (widget.strings.isAmharic ? 'የCBE አካውንት አስተካክል' : 'Edit CBE Account')
+                          : (widget.strings.isAmharic ? 'የቴሌብር አካውንት አስተካክል' : 'Edit Telebirr Account'),
+                        style: GoogleFonts.poppins(
+                          color: widget.palette.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (isCbe) ...[
+                        TextField(
+                          controller: holderController,
+                          style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                          decoration: InputDecoration(
+                            labelText: widget.strings.isAmharic ? 'የአካውንት ባለቤት ስም' : 'Account Holder Name',
+                            labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.border),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.purple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: field1Controller,
+                          style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: widget.strings.isAmharic ? 'የአካውንት ቁጥር' : 'Account Number',
+                            labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.border),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.purple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        TextField(
+                          controller: field1Controller,
+                          style: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            labelText: widget.strings.isAmharic ? 'የቴሌብር ስልክ ቁጥር' : 'Telebirr Phone Number',
+                            labelStyle: GoogleFonts.poppins(color: widget.palette.textSecondary),
+                            prefixText: '+251 ',
+                            prefixStyle: GoogleFonts.poppins(color: widget.palette.textPrimary),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.border),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: widget.palette.purple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: widget.palette.purple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: () {
+                            final val1 = field1Controller.text.trim();
+                            final holderVal = holderController.text.trim();
+                            if (isCbe) {
+                              if (val1.isEmpty || holderVal.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(widget.strings.isAmharic ? 'እባክዎ ሁሉንም መስኮች ያስገቡ' : 'Please fill in all fields')),
+                                );
+                                return;
+                              }
+                            } else {
+                              if (val1.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(widget.strings.isAmharic ? 'እባክዎ የስልክ ቁጥር ያስገቡ' : 'Please enter phone number')),
+                                );
+                                return;
+                              }
+                            }
+                            
+                            setStateSheet(() {
+                              sheetStep = 1;
+                            });
+                          },
+                          child: Text(
+                            widget.strings.isAmharic ? 'ማረጋገጫ ኮድ ጠይቅ' : 'Request Verification Code',
+                            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: _buildThreadDetail(thread, p, s),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: widget.palette.card,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: widget.palette.border, width: 1),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: widget.palette.textPrimary),
+                          onPressed: () => setStateSheet(() => sheetStep = 0),
+                        ),
+                        Expanded(
+                          child: Text(
+                            widget.strings.isAmharic ? 'ማንነትዎን ያረጋግጡ' : 'Verify Account Change',
+                            style: GoogleFonts.poppins(
+                              color: widget.palette.textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.strings.isAmharic 
+                        ? 'ወደ ስልክ ቁጥርዎ የተላከውን 6 አሃዝ ኮድ ያስገቡ'
+                        : 'Enter the 6-digit verification code sent to your phone',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(color: widget.palette.textSecondary, fontSize: 13),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(6, (i) {
+                        final hasValue = otpControllers[i].text.isNotEmpty;
+                        return Container(
+                          width: 40,
+                          height: 48,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: hasOtpError
+                                ? Colors.redAccent
+                                : (hasValue ? widget.palette.purple : widget.palette.border),
+                              width: hasValue ? 1.5 : 1.0,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: otpControllers[i],
+                            focusNode: otpFocusNodes[i],
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            maxLength: 1,
+                            style: GoogleFonts.poppins(
+                              color: widget.palette.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: const InputDecoration(
+                              counterText: '',
+                              border: InputBorder.none,
+                            ),
+                            onChanged: (val) {
+                              if (val.length == 1 && i < 5) {
+                                otpFocusNodes[i + 1].requestFocus();
+                              }
+                              if (val.isEmpty && i > 0) {
+                                otpFocusNodes[i - 1].requestFocus();
+                              }
+                              final code = otpControllers.map((c) => c.text).join();
+                              if (code.length == 6) {
+                                setStateSheet(() {
+                                  isVerifying = true;
+                                });
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  if (!mounted) return;
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    if (isCbe) {
+                                      final rawAcct = field1Controller.text.trim();
+                                      _cbeAccount = rawAcct.length > 4 
+                                        ? '**** **** ${rawAcct.substring(rawAcct.length - 4)}'
+                                        : rawAcct;
+                                      _cbeHolder = holderController.text.trim();
+                                      _cbeVerified = true;
+                                    } else {
+                                      final rawPhone = field1Controller.text.trim();
+                                      _telebirrAccount = '+251 9$rawPhone';
+                                      _telebirrVerified = true;
+                                    }
+                                  });
+                                  ScaffoldMessenger.of(this.context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        widget.strings.isAmharic 
+                                          ? 'የክፍያ አካውንት በተሳካ ሁኔታ ተቀይሯል' 
+                                          : 'Payout account updated and verified successfully!'
+                                      ),
+                                    ),
+                                  );
+                                });
+                              }
+                            },
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 24),
+                    if (isVerifying)
+                      CircularProgressIndicator(color: widget.palette.purple)
+                    else
+                      Text(
+                        widget.strings.isAmharic ? 'ኮድ ለማግኘት በመጠባበቅ ላይ...' : 'Waiting for code...',
+                        style: GoogleFonts.poppins(color: widget.palette.textSecondary, fontSize: 11),
+                      ),
+                  ],
+                ),
               ),
             );
           },
@@ -1637,350 +1821,106 @@ class _PaidDmInboxTabState extends State<_PaidDmInboxTab>
       },
     );
   }
-}
-
-class _AudienceInsightsTab extends StatefulWidget {
-  const _AudienceInsightsTab({
-    super.key,
-    required this.palette,
-    required this.strings,
-  });
-
-  final _StudioPalette palette;
-  final _StudioStrings strings;
-
-  @override
-  State<_AudienceInsightsTab> createState() => _AudienceInsightsTabState();
-}
-
-class _AudienceInsightsTabState extends State<_AudienceInsightsTab>
-    with AutomaticKeepAliveClientMixin<_AudienceInsightsTab> {
-  late final ScrollController _scrollController;
-  final Set<String> _expandedTiers = <String>{'tier-1'};
-  final List<_LoyaltyTier> _tiers = <_LoyaltyTier>[
-    _LoyaltyTier(
-      id: 'tier-1',
-      name: 'Amba Tier / አምባ ደረጃ',
-      monthlyEtb: 300,
-      subscriberCount: 1120,
-      perks: <String>[
-        'Early video drops',
-        'Priority DM queue',
-        'One backstage pass code/month',
-      ],
-      enabled: true,
-    ),
-    _LoyaltyTier(
-      id: 'tier-2',
-      name: 'Sheger Tier / ሸገር ደረጃ',
-      monthlyEtb: 550,
-      subscriberCount: 680,
-      perks: <String>[
-        'All Amba perks',
-        'Exclusive rehearsal livestream',
-        'Member-only audio archive',
-      ],
-      enabled: true,
-    ),
-    _LoyaltyTier(
-      id: 'tier-3',
-      name: 'Abyss Tier / አቢስ ደረጃ',
-      monthlyEtb: 900,
-      subscriberCount: 214,
-      perks: <String>[
-        'All Sheger perks',
-        'Quarterly meet-and-greet priority',
-        'VIP event discount code',
-      ],
-      enabled: false,
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final _StudioPalette p = widget.palette;
-    final _StudioStrings s = widget.strings;
-    final int followers = 58240;
-    final int paid = 8240;
-    final double conversion = paid / followers;
-
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: _PageHeading(
-            title: s.audienceInsights,
-            subtitle: s.audienceSubtitle,
-            palette: p,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Settled Balance
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: _StudioCard(
-              palette: p,
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    s.supporterDensity,
-                    style: GoogleFonts.poppins(
-                      color: p.primaryText,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+          child: Column(
+            children: [
+              Text('Ready for Cash-out', style: GoogleFonts.poppins(fontSize: 14, color: widget.palette.textSecondary)),
+              const SizedBox(height: 8),
+              Text('ETB 84,200.00', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.palette.green,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _DensityTile(
-                          title: s.followersLabel,
-                          value: _formatCompact(followers),
-                          palette: p,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _DensityTile(
-                          title: s.paidSupportersLabel,
-                          value: _formatCompact(paid),
-                          palette: p,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _DensityTile(
-                          title: s.conversionLabel,
-                          value: '${(conversion * 100).toStringAsFixed(1)}%',
-                          palette: p,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  child: Text('Withdraw Funds', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
               ),
-            ),
+            ],
           ),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 8),
-            child: Text(
-              s.loyaltyTiers,
-              style: GoogleFonts.poppins(
-                color: p.primaryText,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+        const SizedBox(height: 24),
+        // Banks
+        Text('Local Bank Routing', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
           ),
-        ),
-        SliverList.builder(
-          itemCount: _tiers.length,
-          itemBuilder: (context, index) {
-            final _LoyaltyTier tier = _tiers[index];
-            final bool expanded = _expandedTiers.contains(tier.id);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _StudioCard(
-                palette: p,
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            children: [
+              ListTile(
+                leading: Icon(Icons.account_balance, color: widget.palette.purple),
+                title: Text(_cbeHolder, style: GoogleFonts.poppins(fontSize: 14, color: widget.palette.textPrimary)),
+                subtitle: Text(_cbeAccount, style: GoogleFonts.robotoMono(fontSize: 12, color: widget.palette.textSecondary)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (expanded) {
-                            _expandedTiers.remove(tier.id);
-                          } else {
-                            _expandedTiers.add(tier.id);
-                          }
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  tier.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    color: p.primaryText,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  '${_formatEtb(tier.monthlyEtb)} / ${s.monthly}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.robotoMono(
-                                    color: p.primaryAction,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                _formatCompact(tier.subscriberCount),
-                                style: GoogleFonts.poppins(
-                                  color: p.primaryText,
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                s.subscribers,
-                                style: GoogleFonts.poppins(
-                                  color: p.secondaryText,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                          Switch.adaptive(
-                            value: tier.enabled,
-                            activeColor: p.positive,
-                            onChanged: (value) {
-                              setState(() {
-                                tier.enabled = value;
-                              });
-                            },
-                          ),
-                          Icon(
-                            expanded
-                                ? Icons.keyboard_arrow_up_rounded
-                                : Icons.keyboard_arrow_down_rounded,
-                            color: p.secondaryText,
-                          ),
-                        ],
-                      ),
-                    ),
-                    AnimatedCrossFade(
-                      duration: const Duration(milliseconds: 180),
-                      crossFadeState: expanded
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
-                      firstChild: Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: tier.perks
-                              .map(
-                                (perk) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 6,
-                                        height: 6,
-                                        margin: const EdgeInsets.only(top: 6),
-                                        decoration: BoxDecoration(
-                                          color: p.primaryAction,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          perk,
-                                          style: GoogleFonts.poppins(
-                                            color: p.secondaryText,
-                                            fontSize: 11.5,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                      secondChild: const SizedBox.shrink(),
+                    if (_cbeVerified) Icon(Icons.check_circle, color: widget.palette.green, size: 20),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: widget.palette.purple, size: 20),
+                      onPressed: () => _showEditAccountSheet(true),
                     ),
                   ],
                 ),
               ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _PageHeading extends StatelessWidget {
-  const _PageHeading({
-    required this.title,
-    required this.subtitle,
-    required this.palette,
-  });
-
-  final String title;
-  final String subtitle;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.poppins(
-            color: palette.primaryText,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.2,
+              Divider(height: 1, color: widget.palette.border),
+              ListTile(
+                leading: Icon(Icons.phone_android, color: widget.palette.purple),
+                title: Text('Telebirr', style: GoogleFonts.poppins(fontSize: 14, color: widget.palette.textPrimary)),
+                subtitle: Text(_telebirrAccount, style: GoogleFonts.robotoMono(fontSize: 12, color: widget.palette.textSecondary)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_telebirrVerified) Icon(Icons.check_circle, color: widget.palette.green, size: 20),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: widget.palette.purple, size: 20),
+                      onPressed: () => _showEditAccountSheet(false),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.poppins(
-            color: palette.secondaryText,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w500,
+        const SizedBox(height: 24),
+        // Historical Settlement Stream
+        Text('Historical Settlements', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: widget.palette.textPrimary)),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: widget.palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: widget.palette.border, width: 1),
+          ),
+          child: Column(
+            children: [
+              _SettlementRow(id: '#SET-041', account: 'CBE **** 1234', status: widget.strings.isAmharic ? 'ገቢ ሆኗል' : 'Settled', palette: widget.palette),
+              Divider(height: 1, color: widget.palette.border),
+              _SettlementRow(id: '#SET-040', account: 'Telebirr ****', status: widget.strings.isAmharic ? 'በመጠባበቅ ላይ' : 'Processing', palette: widget.palette),
+            ],
           ),
         ),
       ],
@@ -1988,858 +1928,41 @@ class _PageHeading extends StatelessWidget {
   }
 }
 
-class _StudioCard extends StatelessWidget {
-  const _StudioCard({
-    required this.palette,
-    required this.child,
-    this.padding = const EdgeInsets.all(12),
-    this.background,
-  });
-
+class _SettlementRow extends StatelessWidget {
+  final String id;
+  final String account;
+  final String status;
   final _StudioPalette palette;
-  final Widget child;
-  final EdgeInsets padding;
-  final Color? background;
+
+  const _SettlementRow({required this.id, required this.account, required this.status, required this.palette});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: background ?? palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.stroke, width: 1),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.palette,
-    required this.label,
-    required this.value,
-    required this.chipText,
-    required this.chipColor,
-  });
-
-  final _StudioPalette palette;
-  final String label;
-  final String value;
-  final String chipText;
-  final Color chipColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return _StudioCard(
-      palette: palette,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    Color statusColor = (status == 'Settled' || status == 'ገቢ ሆኗል') ? palette.green : palette.amber;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
         children: [
-          Text(
-            label.toUpperCase(),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              color: palette.secondaryText,
-              fontSize: 9.8,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.9,
-              height: 1.25,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(id, style: GoogleFonts.robotoMono(fontSize: 12, color: palette.textSecondary)),
+                Text(account, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: palette.textPrimary)),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.robotoMono(
-              color: palette.primaryText,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              height: 1.05,
-            ),
-          ),
-          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: chipColor.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: chipColor.withValues(alpha: 0.45),
-                width: 1,
-              ),
+              color: statusColor.withAlpha(20),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: statusColor.withAlpha(50), width: 1),
             ),
-            child: Text(
-              chipText,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.poppins(
-                color: palette.primaryText,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            child: Text(status, style: GoogleFonts.poppins(fontSize: 10, color: statusColor, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
-}
-
-class _MiniMetric extends StatelessWidget {
-  const _MiniMetric({
-    required this.label,
-    required this.value,
-    required this.palette,
-  });
-
-  final String label;
-  final String value;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Flexible(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              color: palette.secondaryText,
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.6,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.robotoMono(
-              color: palette.primaryText,
-              fontSize: 10.8,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ItemBadge extends StatelessWidget {
-  const _ItemBadge({
-    required this.label,
-    required this.palette,
-  });
-
-  final String label;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: palette.surfaceAlt,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: palette.stroke, width: 1),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.poppins(
-          color: palette.primaryText,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.status,
-    required this.palette,
-    required this.strings,
-  });
-
-  final _LedgerStatus status;
-  final _StudioPalette palette;
-  final _StudioStrings strings;
-
-  @override
-  Widget build(BuildContext context) {
-    Color fg;
-    Color bg;
-    String text;
-    switch (status) {
-      case _LedgerStatus.fulfilled:
-        fg = palette.positive;
-        bg = palette.positive.withValues(alpha: 0.12);
-        text = strings.fulfilled;
-      case _LedgerStatus.pending:
-        fg = palette.pending;
-        bg = palette.pending.withValues(alpha: 0.12);
-        text = strings.pending;
-      case _LedgerStatus.failed:
-        fg = const Color(0xFFFF5252);
-        bg = const Color(0xFFFF5252).withValues(alpha: 0.12);
-        text = strings.failed;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: fg.withValues(alpha: 0.5), width: 1),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(
-          color: fg,
-          fontSize: 10.2,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _TierRingAvatar extends StatelessWidget {
-  const _TierRingAvatar({
-    required this.tier,
-    required this.palette,
-  });
-
-  final _TierLevel tier;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color ringColor = switch (tier) {
-      _TierLevel.gold => const Color(0xFFFFD54F),
-      _TierLevel.silver => const Color(0xFFCFD8DC),
-      _TierLevel.platinum => palette.primaryAction,
-    };
-    return Container(
-      width: 40,
-      height: 40,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: ringColor.withValues(alpha: 0.85), width: 1),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: palette.surface,
-          border: Border.all(color: palette.stroke, width: 1),
-        ),
-        child: Icon(
-          Icons.person_outline_rounded,
-          color: palette.primaryText,
-          size: 18,
-        ),
-      ),
-    );
-  }
-}
-
-class _DensityTile extends StatelessWidget {
-  const _DensityTile({
-    required this.title,
-    required this.value,
-    required this.palette,
-  });
-
-  final String title;
-  final String value;
-  final _StudioPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-      decoration: BoxDecoration(
-        color: palette.surfaceAlt,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: palette.stroke, width: 1),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.robotoMono(
-              color: palette.primaryText,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              color: palette.secondaryText,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({
-    required this.palette,
-    required this.icon,
-    required this.label,
-  });
-
-  final _StudioPalette palette;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      decoration: BoxDecoration(
-        color: palette.surfaceAlt,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: palette.stroke, width: 1),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: palette.primaryAction, size: 18),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.poppins(
-                color: palette.primaryText,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyPanel extends StatelessWidget {
-  const _EmptyPanel({
-    required this.palette,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final _StudioPalette palette;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return _StudioCard(
-      palette: palette,
-      padding: const EdgeInsets.fromLTRB(12, 18, 12, 18),
-      child: Column(
-        children: [
-          Icon(Icons.inbox_outlined, color: palette.secondaryText, size: 22),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              color: palette.primaryText,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              color: palette.secondaryText,
-              fontSize: 11.2,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StudioImage extends StatelessWidget {
-  const _StudioImage({required this.source});
-
-  final String source;
-
-  @override
-  Widget build(BuildContext context) {
-    if (source.startsWith('http')) {
-      return Image.network(
-        source,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _fallback(),
-      );
-    }
-    return Image.asset(
-      source,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _fallback(),
-    );
-  }
-
-  Widget _fallback() {
-    return Container(
-      color: const Color(0xFF1A1A1E),
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.videocam_outlined,
-        color: Color(0xFFD500F9),
-        size: 20,
-      ),
-    );
-  }
-}
-
-class _RevenueChartPainter extends CustomPainter {
-  _RevenueChartPainter({
-    required this.points,
-    required this.lineColor,
-    required this.gridColor,
-  });
-
-  final List<double> points;
-  final Color lineColor;
-  final Color gridColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint gridPaint = Paint()
-      ..color = gridColor
-      ..strokeWidth = 1;
-    for (int i = 0; i <= 6; i++) {
-      final double x = (size.width / 6) * i;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-    for (int i = 0; i <= 4; i++) {
-      final double y = (size.height / 4) * i;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-    if (points.isEmpty) return;
-
-    final double minValue = points.reduce(math.min);
-    final double maxValue = points.reduce(math.max);
-    final double span = math.max(1, maxValue - minValue);
-    final double stepX =
-        points.length == 1 ? 0 : size.width / (points.length - 1);
-    final Path path = Path();
-    for (int i = 0; i < points.length; i++) {
-      final double normalized = (points[i] - minValue) / span;
-      final double x = i * stepX;
-      final double y = size.height - (normalized * (size.height - 16)) - 8;
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-
-    final Paint linePaint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 2.1
-      ..style = PaintingStyle.stroke;
-    canvas.drawPath(path, linePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _RevenueChartPainter oldDelegate) {
-    return oldDelegate.points != points ||
-        oldDelegate.lineColor != lineColor ||
-        oldDelegate.gridColor != gridColor;
-  }
-}
-
-class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedHeaderDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
-
-  final double minHeight;
-  final double maxHeight;
-  final Widget child;
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return oldDelegate.minHeight != minHeight ||
-        oldDelegate.maxHeight != maxHeight ||
-        oldDelegate.child != child;
-  }
-}
-
-class _StudioPalette {
-  _StudioPalette({required this.isDark});
-
-  final bool isDark;
-
-  Color get canvas =>
-      isDark ? const Color(0xFF0B0B0E) : const Color(0xFFF8F9FA);
-  Color get surface =>
-      isDark ? const Color(0xFF1A1A1E) : const Color(0xFFF1F3F5);
-  Color get surfaceAlt =>
-      isDark ? const Color(0xFF141418) : const Color(0xFFFFFFFF);
-  Color get primaryText => isDark ? Colors.white : const Color(0xFF121214);
-  Color get secondaryText =>
-      isDark ? Colors.white.withValues(alpha: 0.72) : const Color(0xFF4C4F55);
-  Color get stroke =>
-      isDark ? const Color(0x1AFFFFFF) : const Color(0x1A000000);
-  Color get positive => const Color(0xFF00E676);
-  Color get primaryAction => const Color(0xFFD500F9);
-  Color get pending => const Color(0xFFFFAB00);
-}
-
-class _StudioStrings {
-  const _StudioStrings(this.isAmharic);
-
-  final bool isAmharic;
-
-  String get overview => isAmharic ? 'Overview / አጠቃላይ' : 'Overview';
-  String get overviewSubtitle => isAmharic
-      ? 'Real-time studio health, escrow, and revenue paths.'
-      : 'Real-time studio health, escrow, and revenue paths.';
-  String get revenuePath =>
-      isAmharic ? 'Revenue Path / የገቢ መስመር' : 'Revenue Path';
-  String get revenuePathSub => isAmharic
-      ? 'Last 12 checkpoints (ETB trend)'
-      : 'Last 12 checkpoints (ETB trend)';
-  String get transactionLedger =>
-      isAmharic ? 'Transaction Ledger / የግብይት መዝገብ' : 'Transaction Ledger';
-  String get netVaultBalance =>
-      isAmharic ? 'Net Vault Balance' : 'Net Vault Balance';
-  String get totalActiveBackers =>
-      isAmharic ? 'Total Active Backers / ደጋፊዎች' : 'Total Active Backers';
-  String get dmEscrowVault =>
-      isAmharic ? 'Monetized DM Escrow Vault' : 'Monetized DM Escrow Vault';
-  String get thisWeek => isAmharic ? 'this week' : 'this week';
-  String get liveCount => isAmharic ? 'LIVE COUNT' : 'LIVE COUNT';
-  String get inboundPaidDm =>
-      isAmharic ? 'Inbound Paid DMs' : 'Inbound Paid DMs';
-  String get locked => isAmharic ? 'Locked' : 'Locked';
-  String get fulfilled => isAmharic ? 'Fulfilled' : 'Fulfilled';
-  String get pending => isAmharic ? 'Pending' : 'Pending';
-  String get failed => isAmharic ? 'Failed' : 'Failed';
-
-  String get contentLibrary =>
-      isAmharic ? 'Content Library / የይዘት ቤተ መዘክር' : 'Content Library';
-  String get contentSubtitle => isAmharic
-      ? 'Manage releases, pricing, visibility, and performance.'
-      : 'Manage releases, pricing, visibility, and performance.';
-  String mediaFilterLabel(_MediaFilter filter) {
-    switch (filter) {
-      case _MediaFilter.all:
-        return isAmharic ? 'All / ሁሉም' : 'All';
-      case _MediaFilter.videos:
-        return isAmharic ? 'Videos / ቪዲዮዎች' : 'Videos';
-      case _MediaFilter.audio:
-        return isAmharic ? 'Audio / ሙዚቃ' : 'Audio';
-      case _MediaFilter.tickets:
-        return isAmharic ? 'Tickets / ትኬቶች' : 'Tickets';
-    }
-  }
-
-  String get publicLabel => isAmharic ? 'Public / ይፋዊ' : 'Public';
-  String get draftLabel => isAmharic ? 'Draft / ረቂቅ' : 'Draft';
-  String get viewsShort => isAmharic ? 'VIEWS' : 'VIEWS';
-  String get likesShort => isAmharic ? 'LIKES' : 'LIKES';
-  String get manageItem => isAmharic ? 'Manage item' : 'Manage item';
-  String get changeMonetization =>
-      isAmharic ? 'Change monetization tier' : 'Change monetization tier';
-  String get adjustPricing =>
-      isAmharic ? 'Adjust local ETB pricing' : 'Adjust local ETB pricing';
-  String get changeVisibility => isAmharic
-      ? 'Change visibility permissions'
-      : 'Change visibility permissions';
-  String get close => isAmharic ? 'Close' : 'Close';
-  String get noItems => isAmharic ? 'No items found' : 'No items found';
-  String get noItemsSubtitle => isAmharic
-      ? 'Try another filter or add a new release.'
-      : 'Try another filter or add a new release.';
-
-  String get paidDmInbox =>
-      isAmharic ? 'Paid DM Inbox / የክፍያ DM ሳጥን' : 'Paid DM Inbox';
-  String get paidDmSubtitle => isAmharic
-      ? 'Priority queue for escrow-backed fan messages.'
-      : 'Priority queue for escrow-backed fan messages.';
-  String dmFilterLabel(_DmFilter filter) {
-    switch (filter) {
-      case _DmFilter.highestValue:
-        return isAmharic ? 'Highest Value / ከፍተኛ ክፍያ' : 'Highest Value';
-      case _DmFilter.unanswered:
-        return isAmharic ? 'Unanswered / ያልተመለሱ' : 'Unanswered';
-      case _DmFilter.completed:
-        return isAmharic ? 'Completed / ያለቁ' : 'Completed';
-    }
-  }
-
-  String get noMessages =>
-      isAmharic ? 'No messages in this queue' : 'No messages in this queue';
-  String get noMessagesSub => isAmharic
-      ? 'New paid messages will appear here.'
-      : 'New paid messages will appear here.';
-  String get selectDmThread =>
-      isAmharic ? 'Select a DM thread' : 'Select a DM thread';
-  String get selectDmThreadSub => isAmharic
-      ? 'Choose a message to open fulfillment view.'
-      : 'Choose a message to open fulfillment view.';
-  String get oneTimeDmFee =>
-      isAmharic ? 'One-time DM unlock fee' : 'One-time DM unlock fee';
-  String get payOnceOnly =>
-      isAmharic ? 'pay once, not per text' : 'pay once, not per text';
-  String get unlockThread => isAmharic ? 'Unlock Thread' : 'Unlock Thread';
-  String get unlockConfirmed => isAmharic
-      ? 'Thread unlocked. You can now send unlimited replies.'
-      : 'Thread unlocked. You can now send unlimited replies.';
-  String get replyHint =>
-      isAmharic ? 'Type your response...' : 'Type your response...';
-  String get approveCollect =>
-      isAmharic ? 'Approve & Collect Payout' : 'Approve & Collect Payout';
-  String get payoutApproved =>
-      isAmharic ? 'Payout approved and queued.' : 'Payout approved and queued.';
-
-  String get audienceInsights =>
-      isAmharic ? 'Audience Insights / የተከታይ ትንታኔ' : 'Audience Insights';
-  String get audienceSubtitle => isAmharic
-      ? 'Track fan growth, paid conversion, and loyalty tiers.'
-      : 'Track fan growth, paid conversion, and loyalty tiers.';
-  String get supporterDensity =>
-      isAmharic ? 'Supporter Density Breakdown' : 'Supporter Density Breakdown';
-  String get followersLabel => isAmharic ? 'Followers / ተከታዮች' : 'Followers';
-  String get paidSupportersLabel =>
-      isAmharic ? 'Paid Supporters / ደጋፊዎች' : 'Paid Supporters';
-  String get conversionLabel => isAmharic ? 'Conversion' : 'Conversion';
-  String get loyaltyTiers =>
-      isAmharic ? 'Loyalty Tier Configurator' : 'Loyalty Tier Configurator';
-  String get monthly => isAmharic ? 'Month' : 'Month';
-  String get subscribers => isAmharic ? 'Subscribers' : 'Subscribers';
-}
-
-class _LedgerEntry {
-  const _LedgerEntry({
-    required this.id,
-    required this.itemLabel,
-    required this.dateTime,
-    required this.amountEtb,
-    required this.status,
-  });
-
-  final String id;
-  final String itemLabel;
-  final String dateTime;
-  final double amountEtb;
-  final _LedgerStatus status;
-}
-
-class _MediaItem {
-  const _MediaItem({
-    required this.id,
-    required this.title,
-    required this.visibility,
-    required this.uploadedAt,
-    required this.duration,
-    required this.views,
-    required this.engagement,
-    required this.revenueEtb,
-    required this.type,
-    required this.thumbnail,
-  });
-
-  final String id;
-  final String title;
-  final _MediaVisibility visibility;
-  final String uploadedAt;
-  final String duration;
-  final String views;
-  final String engagement;
-  final double revenueEtb;
-  final _MediaFilter type;
-  final String thumbnail;
-}
-
-class _PaidDmThread {
-  _PaidDmThread({
-    required this.id,
-    required this.fanName,
-    required this.timeLabel,
-    required this.preview,
-    required this.tier,
-    required this.amountEtb,
-    required this.state,
-    required this.unlockFeeEtb,
-    required this.unlocked,
-    required this.messages,
-  });
-
-  final String id;
-  final String fanName;
-  String timeLabel;
-  String preview;
-  final _TierLevel tier;
-  final double amountEtb;
-  _DmState state;
-  final double unlockFeeEtb;
-  bool unlocked;
-  final List<_ThreadMessage> messages;
-}
-
-class _ThreadMessage {
-  _ThreadMessage({
-    required this.fromCreator,
-    required this.text,
-    required this.timeLabel,
-  });
-
-  final bool fromCreator;
-  final String text;
-  final String timeLabel;
-}
-
-class _LoyaltyTier {
-  _LoyaltyTier({
-    required this.id,
-    required this.name,
-    required this.monthlyEtb,
-    required this.subscriberCount,
-    required this.perks,
-    required this.enabled,
-  });
-
-  final String id;
-  final String name;
-  final double monthlyEtb;
-  final int subscriberCount;
-  final List<String> perks;
-  bool enabled;
-}
-
-class _NavItem {
-  const _NavItem({
-    required this.label,
-    required this.shortLabel,
-    required this.icon,
-  });
-
-  final String label;
-  final String shortLabel;
-  final IconData icon;
-}
-
-List<_NavItem> _navItems(_StudioStrings s) => <_NavItem>[
-      _NavItem(
-        label: s.overview,
-        shortLabel: 'Overview',
-        icon: Icons.grid_view_rounded,
-      ),
-      _NavItem(
-        label: s.contentLibrary,
-        shortLabel: 'Library',
-        icon: Icons.video_collection_outlined,
-      ),
-      _NavItem(
-        label: s.paidDmInbox,
-        shortLabel: 'Paid DM',
-        icon: Icons.forum_outlined,
-      ),
-      _NavItem(
-        label: s.audienceInsights,
-        shortLabel: 'Audience',
-        icon: Icons.groups_outlined,
-      ),
-    ];
-
-enum _LedgerStatus { fulfilled, pending, failed }
-
-enum _MediaVisibility { public, draft }
-
-enum _MediaFilter { all, videos, audio, tickets }
-
-enum _DmFilter { highestValue, unanswered, completed }
-
-enum _DmState { unanswered, completed }
-
-enum _TierLevel { gold, silver, platinum }
-
-String _formatCompact(num value) {
-  if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
-  if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}K';
-  return value.toStringAsFixed(value is int ? 0 : 1);
-}
-
-String _formatEtb(num value) {
-  final bool negative = value < 0;
-  final num absValue = value.abs();
-  final int whole = absValue.floor();
-  final int cents = ((absValue - whole) * 100).round();
-  final String wholeWithComma = _withComma(whole);
-  final String centStr = cents.toString().padLeft(2, '0');
-  return '${negative ? '-' : ''}ETB $wholeWithComma.$centStr';
-}
-
-String _withComma(int value) {
-  final String source = value.toString();
-  final StringBuffer buffer = StringBuffer();
-  for (int i = 0; i < source.length; i++) {
-    final int remaining = source.length - i;
-    buffer.write(source[i]);
-    if (remaining > 1 && remaining % 3 == 1) {
-      buffer.write(',');
-    }
-  }
-  return buffer.toString();
-}
-
-String _timeLabelNow() {
-  final DateTime now = DateTime.now();
-  final String hour = now.hour.toString().padLeft(2, '0');
-  final String minute = now.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }

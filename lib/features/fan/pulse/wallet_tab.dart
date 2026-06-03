@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/state/wallet_state.dart';
 
 /// Wallet Tab for the Kerebta (ቀረብታ) platform.
 ///
@@ -30,9 +32,15 @@ class _WalletTabState extends State<WalletTab>
   bool get _isLight => Theme.of(context).brightness == Brightness.light;
   Color get _surfaceCard => _isLight ? _surfaceCardLight : _surfaceCardDark;
 
+  void _updateState() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    WalletState.ledger.addListener(_updateState);
+    WalletState.balance.addListener(_updateState);
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -46,6 +54,8 @@ class _WalletTabState extends State<WalletTab>
 
   @override
   void dispose() {
+    WalletState.ledger.removeListener(_updateState);
+    WalletState.balance.removeListener(_updateState);
     _animController.dispose();
     super.dispose();
   }
@@ -63,56 +73,7 @@ class _WalletTabState extends State<WalletTab>
   static const Color _surfaceCardLight = Colors.white;
 
   // ── Mock Ledger Data ──
-  final List<Map<String, dynamic>> _ledger = [
-    {
-      'title': 'Top-Up via Telebirr',
-      'titleAmh': 'በቴሌብር የተሞላ',
-      'time': 'Today, 1:45 PM',
-      'timeAmh': 'ዛሬ, 1:45 ከሰዓት',
-      'amount': 500.00,
-      'isCredit': true,
-    },
-    {
-      'title': 'Abeni Tour Tee Purchase',
-      'titleAmh': 'የአቤኒ ቱር ቲሸርት ግዢ',
-      'time': 'Yesterday, 8:12 PM',
-      'timeAmh': 'ትላንት, 8:12 ምሽት',
-      'amount': -1200.00,
-      'isCredit': false,
-    },
-    {
-      'title': 'Ad-Revenue Payout',
-      'titleAmh': 'የማስታወቂያ ክፍያ ገቢ',
-      'time': 'May 20, 10:30 AM',
-      'timeAmh': 'ግንቦት 12, 10:30 ጠዋት',
-      'amount': 2850.50,
-      'isCredit': true,
-    },
-    {
-      'title': 'Challenge Entry: Fund My EP',
-      'titleAmh': 'የፈተና ተሳትፎ: ለEP ማሰባሰቢያ',
-      'time': 'May 18, 4:15 PM',
-      'timeAmh': 'ግንቦት 10, 4:15 ከሰዓት',
-      'amount': -350.00,
-      'isCredit': false,
-    },
-    {
-      'title': 'Aster Aweke Live Ticket',
-      'titleAmh': 'የአስቴር አወቀ ቀጥታ ትኬት',
-      'time': 'May 15, 2:00 PM',
-      'timeAmh': 'ግንቦት 7, 2:00 ከሰዓት',
-      'amount': -800.00,
-      'isCredit': false,
-    },
-    {
-      'title': 'Vault Top-Up (CBE Transfer)',
-      'titleAmh': 'የኪስ ቦርሳ ሙሌት (CBE ማስተላለፍ)',
-      'time': 'May 12, 9:00 AM',
-      'timeAmh': 'ግንቦት 4, 9:00 ጠዋት',
-      'amount': 5000.00,
-      'isCredit': true,
-    },
-  ];
+  // Ledger data comes from WalletState.ledger.value
 
   // ── Helper to format balance with privacy mask ──
   String _formatBalance(double value) {
@@ -943,7 +904,7 @@ class _WalletTabState extends State<WalletTab>
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                _formatBalance(1250.00),
+                                                _formatBalance(WalletState.balance.value),
                                                 style: GoogleFonts.robotoMono(
                                                   color: _isLight
                                                       ? Colors.black
@@ -1222,7 +1183,7 @@ class _WalletTabState extends State<WalletTab>
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final item = _ledger[index];
+                      final item = WalletState.ledger.value[index];
                       final bool isCredit = item['isCredit'] as bool;
                       final double amount = item['amount'] as double;
                       final String title = widget.isAmharic
@@ -1328,7 +1289,7 @@ class _WalletTabState extends State<WalletTab>
                         ),
                       );
                     },
-                    childCount: _ledger.length,
+                    childCount: WalletState.ledger.value.length,
                   ),
                 ),
               ),

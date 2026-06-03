@@ -16,6 +16,7 @@ dependencies:
   google_sign_in: ^6.3.0
   sign_in_with_apple: ^6.1.4
   crypto: ^3.0.6
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

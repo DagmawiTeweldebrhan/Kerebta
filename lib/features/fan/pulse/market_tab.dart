@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/state/wallet_state.dart';
 
 /// Market Tab for the Kerebta (ቀረብታ) platform.
 ///
@@ -33,7 +34,6 @@ class _MarketTabState extends State<MarketTab>
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-  final ValueNotifier<double> userWalletBalance = ValueNotifier<double>(1250.0);
   final ValueNotifier<List<Map<String, dynamic>>> userPurchasedProducts =
       ValueNotifier<List<Map<String, dynamic>>>(<Map<String, dynamic>>[]);
 
@@ -65,7 +65,6 @@ class _MarketTabState extends State<MarketTab>
     _countdownTimer.cancel();
     _fadeController.dispose();
     _searchController.dispose();
-    userWalletBalance.dispose();
     userPurchasedProducts.dispose();
     super.dispose();
   }
@@ -361,7 +360,7 @@ class _MarketTabState extends State<MarketTab>
                                             size: 16),
                                         const SizedBox(width: 6),
                                         ValueListenableBuilder<double>(
-                                            valueListenable: userWalletBalance,
+                                            valueListenable: WalletState.balance,
                                             builder: (context, balance, _) {
                                               return Text(
                                                 '${balance.toStringAsFixed(0)} ETB',
@@ -1325,7 +1324,7 @@ class _MarketTabState extends State<MarketTab>
                       ),
                     ),
                     ValueListenableBuilder<double>(
-                        valueListenable: userWalletBalance,
+                        valueListenable: WalletState.balance,
                         builder: (valueContext, balance, _) {
                           return Text(
                             'ETB ${balance.toStringAsFixed(2)}',
@@ -1362,7 +1361,7 @@ class _MarketTabState extends State<MarketTab>
                 ),
                 const SizedBox(height: 24),
                 ValueListenableBuilder<double>(
-                    valueListenable: userWalletBalance,
+                    valueListenable: WalletState.balance,
                     builder: (valueContext, balance, _) {
                       final bool hasEnough = balance >= price;
                       return SizedBox(
@@ -1392,7 +1391,14 @@ class _MarketTabState extends State<MarketTab>
                               );
                               return;
                             }
-                            userWalletBalance.value -= price;
+                            WalletState.addTransaction({
+                              'title': 'Purchase: ${product['name']}',
+                              'titleAmh': 'ግዢ: ${product['nameAmh'] ?? product['name']}',
+                              'time': 'Just now',
+                              'timeAmh': 'አሁን',
+                              'amount': -price,
+                              'isCredit': false,
+                            });
                             userPurchasedProducts.value =
                                 List.from(userPurchasedProducts.value)
                                   ..add({
